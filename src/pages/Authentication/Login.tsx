@@ -17,18 +17,16 @@ import * as Yup from "yup";
 import { toast, Slide, ToastContainer } from "react-toastify";
 import { getFirebaseBackend } from "../../helpers/firebase_helper";
 
-const Login = (props: any) => {
-  document.title = "Login ";
+const Login = () => {
+  document.title = "Login";
 
   const [loading, setLoading] = useState<boolean>(false);
   const [passwordShow, setPasswordShow] = useState<boolean>(false);
   const firebaseBackend = getFirebaseBackend();
-  let navigate = useNavigate();
+  const navigate = useNavigate();
 
   const validation: any = useFormik({
-    // enableReinitialize : use this flag when initial values needs to be changed
     enableReinitialize: true,
-
     initialValues: {
       email: "",
       password: "",
@@ -49,14 +47,13 @@ const Login = (props: any) => {
           );
           sessionStorage.setItem("user_details", JSON.stringify(user));
 
-          if (user.status == 0) {
-            toast.warning("please wait until admin approve your account");
+          if (user.status === 0) {
+            toast.warning("Please wait until admin approves your account");
             await firebaseBackend.logout();
             return;
           }
-          if (user.role == "trainer" || user.role == "trainee") {
-            props.router.navigate("/dashboard");
-
+          if (user.role === "trainer" || user.role === "trainee" || user.role === "admin") {
+            navigate("/dashboard");
             return;
           }
 
@@ -67,6 +64,7 @@ const Login = (props: any) => {
       }
     },
   });
+
 
   return (
     <React.Fragment>
@@ -178,6 +176,7 @@ const Login = (props: any) => {
                                       className="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon"
                                       type="button"
                                       id="password-addon"
+                                      title="Show/Hide Password"
                                       onClick={() =>
                                         setPasswordShow(!passwordShow)
                                       }
@@ -207,7 +206,7 @@ const Login = (props: any) => {
 
                                 <div className="mt-4 text-center">
                                   <div className="signin-other-title">
-                                    <h5 className="fs-15 mb-3 title"></h5>
+                                    <h5 className="fs-15 mb-3 title">Sign in with</h5>
                                   </div>
                                 </div>
 
