@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
-import { Card, Col, Dropdown, Form, Row } from "react-bootstrap";
+import { Card, Col, Dropdown, Form, Row, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 
@@ -19,31 +19,16 @@ interface userProps {
 const UserTable = ({ isShow, hideUserModal }: userProps) => {
   const [users, setUsers] = useState<any>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [showAddUser, setShowAddUser] = useState<boolean>(false);
   const firebaseBackend = getFirebaseBackend();
 
-  //comment this out when you get the storage on your firebase
-  // don't forget to comment out the onClick inside the link tag that opens the pdf (line 251 approximately)
+  const handleShowAddUser = () => {
+    setShowAddUser(true);
+  };
 
-  // const fetchCommercialRegister = async () => {
-  //     try {
-  //       const fileRef = storage.ref().child("commercial_register.pdf"); // Update the file path if needed
-  //       const fileUrl = await fileRef.getDownloadURL();
-  //       return fileUrl;
-  //     } catch (error) {
-  //       console.error("Error fetching file:", error);
-  //       return null;
-  //     }
-  //   };
-  // const CommercialRegisterLink = () => {
-  //     const handleOpenFile = async () => {
-  //       const fileUrl = await fetchCommercialRegister();
-  //       if (fileUrl) {
-  //         // Open the file in a new tab
-  //         window.open(fileUrl, "_blank");
-  //       } else {
-  //         alert("Failed to fetch the commercial register file.");
-  //       }
-  //     };
+  const handleCloseAddUser = () => {
+    setShowAddUser(false);
+  };
 
   const handleOpenFile = (item: any) => {
     const commercialRegisterUrl = item.commercial_register; // Get the URL from the user data
@@ -278,6 +263,11 @@ const UserTable = ({ isShow, hideUserModal }: userProps) => {
           </Card>
         </Col>
       </Row>
+
+      <Button variant="primary" onClick={handleShowAddUser}>
+        Create User
+      </Button>
+      <AddUsers isShow={showAddUser} handleClose={handleCloseAddUser} handleShow={handleShowAddUser} />
 
       <AddUsers
         isShow={isShow}

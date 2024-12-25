@@ -73,6 +73,7 @@ const EditUsers = ({ isShow, handleClose, edit }: usereditProps) => {
           <button
             type="button"
             className="btn-close"
+            title="Close"
             onClick={() => {
               formik.resetForm();
               handleClose(false);

@@ -28,8 +28,8 @@ const authProtectedRoutes: Array<RouteObject> = [
   // Dashboard
   { path: "/index", component: <Dashboard /> },
   { path: "/dashboard", component: <Dashboard /> },
-  { path: "/", exact: true, component: <Navigate to="/dashboard" /> },
-  { path: "*", component: <Navigate to="/dashboard" /> },
+  { path: "/", exact: true, component: <Navigate to="/login" /> },
+  { path: "*", component: <Navigate to="/login" /> },
 
   { path: "/trainer-courses-list", component: <TrainerCoursesList /> },
   { path: "/users", component: <Users /> },
