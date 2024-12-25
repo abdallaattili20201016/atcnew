@@ -12,6 +12,9 @@ import Dashboard from "../pages/DashBoard/Index";
 import AboutUs from "../pages/AboutUs/Index";
 import TrainerAnnouncements from "../pages/Trainer/TrainerAnnouncements/Index";
 import TrainerReports from "../pages/Trainer/TrainerReports/Index";
+import AdminReports from "../pages/Admin/AdminReports/Index";
+import AdminAnnouncements from "../pages/Admin/AdminAnnouncements/Index";
+import Users from "../pages/Admin/Users";
 
 interface RouteObject {
   path: string;
@@ -27,7 +30,7 @@ const authProtectedRoutes: Array<RouteObject> = [
   { path: "*", component: <Navigate to="/dashboard" /> },
 
   { path: "/trainer-courses-list", component: <TrainerCoursesList /> },
-  { path: "/user", component: <TrainerCoursesList /> },
+  { path: "/users", component: <Users /> },
 
   {
     path: "/trainer-courses-details/:id",
@@ -39,6 +42,11 @@ const authProtectedRoutes: Array<RouteObject> = [
 
   //  Profile
   { path: "/user-profile", component: <UserProfile /> },
+
+  //admin
+  { path: "/adminreports", component: <AdminReports /> },
+  { path: "/admin-announcements", component: <AdminAnnouncements /> },
+
 ];
 
 const publicRoutes: Array<RouteObject> = [

@@ -1,15 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
-import {
-  Card,
-  Col,
-  Container,
-  Dropdown,
-  Form,
-  Row,
-  Spinner,
-  ToastContainer,
-} from "react-bootstrap";
+import {Card,Col,Container,Dropdown,Form,Row,Spinner,ToastContainer,} from "react-bootstrap";
 import { getFirebaseBackend } from "../../../helpers/firebase_helper";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
@@ -17,6 +8,52 @@ import TableContainer from "../../../Common/Tabledata/TableContainer";
 import NoSearchResult from "../../../Common/Tabledata/NoSearchResult";
 import EditProductList from "../../../Common/CrudModal/EditProductList";
 import { DeleteModal } from "../../../Common/DeleteModal";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "../../../App";
+
+
+const DynamicCard = ({ trainerId }: { trainerId: string }) => {
+  const [course, setCourse] = useState<{ name: string; description?: string; id: string } | null>(null);
+
+  useEffect(() => {
+    const fetchCourse = async () => {
+      try {
+        const q = query(
+          collection(db, "courses"),
+          where("trainerId", "==", trainerId)
+        );
+        const querySnapshot = await getDocs(q);
+
+        // Assuming you want the first course as an example
+        if (!querySnapshot.empty) {
+          const courseData = querySnapshot.docs[0].data() as { name: string; description?: string; id: string };
+          setCourse(courseData);
+        }
+      } catch (error) {
+        console.error("Error fetching course:", error);
+      }
+    };
+
+    fetchCourse();
+    }, [trainerId]);
+  
+    return (
+      <Card className="card-body">
+        <div className="avatar-sm mb-3">
+          <div className="avatar-title bg-success-subtle text-success fs-base rounded">
+            <i className="ri-smartphone-line"></i>
+          </div>
+        </div>
+        <h4 className="card-title">{course?.name}</h4>
+        <p className="card-text text-muted">
+          {course?.description || "No description available."}
+        </p>
+        <Link to={`/trainer-courses-details/${course?.id}`} className="btn btn-success">
+          View Course
+        </Link>
+      </Card>
+    );
+  };
 
 const TrainerCoursesList = () => {
   document.title = "Trainer Courses List";
@@ -217,6 +254,12 @@ const TrainerCoursesList = () => {
               </Card>
             </Col>
           </Row>
+          <Row>
+                        
+                        <Col xxl={4} lg={6}>
+      <DynamicCard trainerId="someTrainerId" />
+                        </Col>
+                    </Row>
         </Container>
       </div>
     </React.Fragment>

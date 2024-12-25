@@ -144,8 +144,8 @@ const EditUsers = ({ isShow, handleClose, edit }: usereditProps) => {
                     <option disabled>Select Status</option>
                     <option value="0">Pending</option>
                     <option value="1">Admin</option>
-                    <option value="2">Warehouse</option>
-                    <option value="3">Pharmacy</option>
+                    <option value="2">User</option>
+                   
                     <option value="-1">Rejected</option>
                   </Form.Select>
                   {formik.touched.status && formik.errors.status && (

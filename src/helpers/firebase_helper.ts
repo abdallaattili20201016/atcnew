@@ -344,6 +344,28 @@ class FirebaseAuthBackend {
     }
   };
 
+///////////////////////////////////////////
+  getAllReports = async (): Promise<any> => {
+    try {
+      const querySnapshot = await this.firestore.collection("reports").get();
+  
+      if (!querySnapshot.empty) {
+        return querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+      } else {
+        console.log("No reports found.");
+        return [];
+      }
+    } catch (error) {
+      console.error("Error fetching reports:", error);
+      throw error;
+    }
+  };
+  ///////////////////////////////////////////
+  
+
   //end attili
 
   getAuthenticatedUser = () => {

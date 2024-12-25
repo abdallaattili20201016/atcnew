@@ -24,6 +24,12 @@ const AdminNavdata = () => {
       link: "/users",
     },
     {
+      id: "reports",
+      label: "Reports",
+      icon: "las la-house-damage",
+      link: "/adminreports",
+    },
+    {
       label: "More",
       isHeader: true,
     },
@@ -70,7 +76,7 @@ const TrainerNavdata = () => {
       id: "TrainerReports",
       label: "Reports",
       icon: "las la-house-damage",
-      link: "/rrainerreports",
+      link: "/trainerreports",
     },
     {
       label: "More",

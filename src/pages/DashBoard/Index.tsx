@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Container, Row, Col, Card } from "react-bootstrap";
+import { Link } from "react-router-dom";
 
 
 
@@ -25,49 +26,41 @@ const Dashboard = () => {
       <div className="page-content">
         <Container fluid>
           <h2 className="my-4">Dashboard</h2>
+          <Card.Body className="pt-1">
+                                    <Row>
+                                        <Col lg={4} className="mini-widget pb-3 pb-lg-0">
+                                            <div className="d-flex align-items-end">
+                                                <div className="flex-grow-1">
+                                                    <h2 className="mb-0 fs-24"></h2>
+                                                    <h5 className="text-muted fs-16 mt-2 mb-0">Clients Added</h5>
+                                                    <p className="text-muted mt-3 pt-1 mb-0 text-truncate"> <span className="badge bg-info me-1">1.15%</span>  since last week</p>
+                                                    </div>
+                                                    </div>
 
-          {/* Row for stats widgets */}
-          <Row className="mb-4">
-            <Col md={3}>
-              <Card className="text-white bg-primary mb-3">
-                <Card.Body>
-                  <Card.Title>Total Courses</Card.Title>
-                  <Card.Text>25</Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col md={3}>
-              <Card className="text-white bg-success mb-3">
-                <Card.Body>
-                  <Card.Title>New Announcements</Card.Title>
-                  <Card.Text>5</Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col md={3}>
-              <Card className="text-white bg-warning mb-3">
-                <Card.Body>
-                  <Card.Title>New Trainees</Card.Title>
-                  <Card.Text>8</Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
+                                        </Col>
 
+                                        <Col lg={4} className="mini-widget pb-3 pb-lg-0">
+                                            <div className="d-flex align-items-end">
+                                                <div className="flex-grow-1">
+                                                    <h2 className="mb-0 fs-24"></h2>
+                                                    <h5 className="text-muted fs-16 mt-2 mb-0">Contracts Signed</h5>
+                                                    <p className="text-muted mt-3 pt-1 mb-0 text-truncate"> <span className="badge bg-danger me-1">1.15%</span>  since last week</p>
+                                                </div>                                                
+                                                </div>
+                                        </Col>
 
-
-          {/* Recent Activities */}
-          <Row className="mt-4">
-            <Col md={12}>
-              <h4>Recent Activities</h4>
-              <ul className="list-group">
-                <li className="list-group-item">Course "React Basics" added.</li>
-                <li className="list-group-item">Announcement "Holiday Schedule" posted.</li>
-                <li className="list-group-item">New trainee registered: John Doe.</li>
-              </ul>
-            </Col>
-          </Row>
-        </Container>
+                                        <Col lg={4} className="mini-widget pb-3 pb-lg-0">
+                                            <div className="d-flex align-items-end">
+                                                <div className="flex-grow-1">
+                                                    <h2 className="mb-0 fs-24"></h2>
+                                                    <h5 className="text-muted fs-16 mt-2 mb-0">Invoice Sent</h5>
+                                                    <p className="text-muted mt-3 pt-1 mb-0 text-truncate"> <span className="badge bg-info me-1">3.14%</span>  since last week</p>
+                                                </div>                                               
+                                            </div>
+                                        </Col >
+                                    </Row>
+                                </Card.Body> 
+          </Container>
       </div>
     </React.Fragment>
   );

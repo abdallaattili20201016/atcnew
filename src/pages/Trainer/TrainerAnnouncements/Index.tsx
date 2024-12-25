@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Container } from "react-bootstrap";
 
-const Dashboard = () => {
-  document.title = "Dashboard";
+const TrainerAnnouncements = () => {
+  document.title = "TrainerAnnouncements";
   const [isShow, setIsShow] = useState(false);
 
   const hidePaymentModal = () => {
@@ -17,4 +17,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default TrainerAnnouncements;

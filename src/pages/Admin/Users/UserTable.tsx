@@ -5,11 +5,11 @@ import { ToastContainer } from "react-toastify";
 
 import moment from "moment";
 import "firebase/storage";
-import TableContainer from "../../Common/Tabledata/TableContainer";
-import NoSearchResult from "../../Common/Tabledata/NoSearchResult";
-import AddUsers from "../../Common/CrudModal/AddUsers";
-import EditUsers from "../../Common/CrudModal/EditUsers";
-import { getFirebaseBackend } from "../../helpers/firebase_helper";
+import TableContainer from "../../../Common/Tabledata/TableContainer";
+import NoSearchResult from "../../../Common/Tabledata/NoSearchResult";
+import AddUsers from "../../../Common/CrudModal/AddUsers";
+import EditUsers from "../../../Common/CrudModal/EditUsers";
+import { getFirebaseBackend } from "../../../helpers/firebase_helper";
 
 interface userProps {
   isShow: any;
@@ -186,13 +186,8 @@ const UserTable = ({ isShow, hideUserModal }: userProps) => {
             case 2:
               return (
                 <span className="badge bg-info-subtle text-primary p-2">
-                  Warehouse
-                </span>
-              );
-            case 3:
-              return (
-                <span className="badge bg-info-subtle text-info p-2">
-                  Pharmacy
+                  
+                  {cell.row.original.role}  
                 </span>
               );
             default:
