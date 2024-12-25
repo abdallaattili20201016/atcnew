@@ -38,7 +38,8 @@ const AnnouncementsTable = () => {
 
   return (
     <React.Fragment>
-      <Row className="mb-4">
+      <div className="page-content">
+     
       <Container fluid>
         <h2 className="my-4">Announcements</h2>
         
@@ -53,7 +54,7 @@ const AnnouncementsTable = () => {
         </Col>
       </Row>
       </Container>
-      </Row>
+     
       <Row className="mb-4">
         <Col xl={12}>
           <Card>
@@ -109,7 +110,7 @@ const AnnouncementsTable = () => {
           </Card>
         </Col>
       </Row>
-
+      </div>
     </React.Fragment>
   );
 };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Button, Table } from "react-bootstrap";
-import { getFirebaseBackend } from "../../../helpers/firebase_helper"; 
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "../../../App"; // Adjust path to your Firebase setup
 
 type Report = {
   id: string;
@@ -20,12 +21,20 @@ const AdminReports = () => {
   const fetchReports = async (reportType: string) => {
     setLoading(true);
     try {
-      const firebaseBackend = getFirebaseBackend();
-      const reports = await firebaseBackend.getAllReports(); // Ensure getAllReports exists and works
+      const reportsCollection = collection(db, "Reports");
+      const reportsQuery = query(reportsCollection, where("type", "==", reportType));
+      const querySnapshot = await getDocs(reportsQuery);
+
+      const reports = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Report[];
+
       setData(reports);
       setSelectedReport(reportType); // Set the selected report type
     } catch (error) {
       console.error("Error fetching reports:", error);
+      alert("Failed to fetch reports. Please try again.");
     } finally {
       setLoading(false);
     }
