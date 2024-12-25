@@ -166,6 +166,7 @@ const Register = () => {
                                     type="text"
                                     className="form-control bg-light border-light"
                                     placeholder="Enter username"
+                                    name="username"
                                     onChange={validation.handleChange}
                                     onBlur={validation.handleBlur}
                                     value={validation.values.username || ""}
@@ -274,40 +275,29 @@ const Register = () => {
                                 </Form.Group>
 
                                 {/* Select */}
-                                <Form.Group className="mb-3">
-                                  <div className="mb-3">
-                                    <Form.Label
-                                      htmlFor="choices-single-default"
-                                      className="form-label"
-                                    >
-                                      Role
-                                    </Form.Label>
-                                    <Form.Select
-                                      className="form-select"
-                                      name="role"
-                                      id="choices-single-role"
-                                      onChange={validation.handleChange}
-                                      onBlur={validation.handleBlur}
-                                      value={validation.values.role}
-                                      isInvalid={
-                                        validation.touched.role &&
-                                        !!validation.errors.role
-                                      }
-                                    >
-                                      <option value="">Select</option>
-                                      {[
-                                        { id: 1, title: "trainee" },
-                                        { id: 2, title: "trainer" },
-                                      ].map((i) => (
-                                        <option key={i.id} value={i.title}>
-                                          {i.title}
-                                        </option>
-                                      ))}
-                                    </Form.Select>
-                                    <Form.Control.Feedback type="invalid">
-                                      {validation.errors.role}
-                                    </Form.Control.Feedback>
-                                  </div>
+                                <Form.Group className="mb-4" controlId="role">
+                                  <Form.Label>
+                                    Role <span className="text-danger">*</span>
+                                  </Form.Label>
+                                  <Form.Select
+                                    name="role"
+                                    className="form-control bg-light border-light"
+                                    onChange={validation.handleChange}
+                                    onBlur={validation.handleBlur}
+                                    value={validation.values.role || ""}
+                                    isInvalid={
+                                      validation.touched.role &&
+                                      !!validation.errors.role
+                                    }
+                                  >
+                                    <option value="">Select a role</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="manager">Manager</option>
+                                    <option value="user">User</option>
+                                  </Form.Select>
+                                  <Form.Control.Feedback type="invalid">
+                                    {validation.errors.role}
+                                  </Form.Control.Feedback>
                                 </Form.Group>
 
                                 <div className="mt-2">

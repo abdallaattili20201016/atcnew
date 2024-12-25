@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Card, Col, Dropdown, Form, Row, Button } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
+import { collection, getDocs, addDoc } from 'firebase/firestore';
+import { db } from "../../../App"; // Adjust to your firebase config path
 
 import moment from "moment";
 import "firebase/storage";
@@ -17,13 +19,17 @@ interface userProps {
 }
 
 const UserTable = ({ isShow, hideUserModal }: userProps) => {
+  const navigate = useNavigate();
   const [users, setUsers] = useState<any>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showAddUser, setShowAddUser] = useState<boolean>(false);
   const firebaseBackend = getFirebaseBackend();
 
-  const handleShowAddUser = () => {
+  const handleShowAddUser = async () => {
     setShowAddUser(true);
+    // Example create:
+    // await addDoc(collection(db, 'users'), { firstName: 'John', lastName: 'Doe' });
+    // fetchUsers(); // re-fetch after adding
   };
 
   const handleCloseAddUser = () => {
@@ -53,7 +59,12 @@ const UserTable = ({ isShow, hideUserModal }: userProps) => {
     }
   };
   useEffect(() => {
-    loadUsers();
+    const fetchUsers = async () => {
+      const snapshot = await getDocs(collection(db, 'users'));
+      const userData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setUsers(userData);
+    };
+    fetchUsers();
   }, [firebaseBackend]);
 
   // Delete modal
@@ -264,16 +275,10 @@ const UserTable = ({ isShow, hideUserModal }: userProps) => {
         </Col>
       </Row>
 
-      <Button variant="primary" onClick={handleShowAddUser}>
+      <Button variant="primary" onClick={() => navigate("/add-user")}>
         Create User
       </Button>
-      <AddUsers isShow={showAddUser} handleClose={handleCloseAddUser} handleShow={handleShowAddUser} />
-
-      <AddUsers
-        isShow={isShow}
-        handleClose={hideUserModal}
-        handleShow={isShow}
-      />
+      {/* Removed <AddUsers> component */}
 
       <EditUsers isShow={editUser} handleClose={handleCloseEdit} edit={edit} />
 

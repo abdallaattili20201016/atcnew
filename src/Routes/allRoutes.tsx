@@ -18,6 +18,7 @@ import CreateAnnouncement from "../pages/Admin/AdminAnnouncements/NewAnnouncemen
 import Users from "../pages/Admin/Users";
 import AdminCourses from "../pages/Admin/AdminCourses/AdminCourses";
 import AddCourse from "../pages/Admin/AdminCourses/AddCourse";
+import AddUserPage from "../pages/Admin/Users/AddUserPage";
 
 
 interface RouteObject {
@@ -49,6 +50,7 @@ const authProtectedRoutes: Array<RouteObject> = [
 
   //admin
   { path: "/adminreports", component: <AdminReports /> },
+  { path: "/add-user", component: <AddUserPage /> },
   // Admin Announcements
   { path: "/announcements-table", component: <AdminAnnouncementsTable /> },
   { path: "/admin-announcements/new", component: <CreateAnnouncement /> },
