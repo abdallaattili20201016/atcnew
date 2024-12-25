@@ -13,8 +13,10 @@ import AboutUs from "../pages/AboutUs/Index";
 import TrainerAnnouncements from "../pages/Trainer/TrainerAnnouncements/Index";
 import TrainerReports from "../pages/Trainer/TrainerReports/Index";
 import AdminReports from "../pages/Admin/AdminReports/Index";
-import AdminAnnouncements from "../pages/Admin/AdminAnnouncements/Index";
+import AdminAnnouncementsTable from "../pages/Admin/AdminAnnouncements/AnnouncementsTable";
+import CreateAnnouncement from "../pages/Admin/AdminAnnouncements/NewAnnouncement";
 import Users from "../pages/Admin/Users";
+
 
 interface RouteObject {
   path: string;
@@ -45,7 +47,10 @@ const authProtectedRoutes: Array<RouteObject> = [
 
   //admin
   { path: "/adminreports", component: <AdminReports /> },
-  { path: "/admin-announcements", component: <AdminAnnouncements /> },
+  // Admin Announcements
+  { path: "/announcements-table", component: <AdminAnnouncementsTable /> },
+  { path: "/admin-announcements/new", component: <CreateAnnouncement /> },
+
 
 ];
 

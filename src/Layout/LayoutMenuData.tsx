@@ -29,6 +29,14 @@ const AdminNavdata = () => {
       icon: "las la-house-damage",
       link: "/adminreports",
     },
+
+    {
+      id: "announcements",
+      label: "Announcements",
+      icon: "las la-house-damage",
+      link: "/announcements-table",
+    },
+
     {
       label: "More",
       isHeader: true,

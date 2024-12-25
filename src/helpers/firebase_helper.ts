@@ -1,7 +1,5 @@
 import firebase from "firebase/compat/app";
 
-import { collection, query, where, getDocs } from "firebase/firestore";
-
 // Add the Firebase products that you want to use
 import "firebase/compat/auth";
 import "firebase/compat/firestore";
@@ -366,26 +364,7 @@ class FirebaseAuthBackend {
     }
   };
   ///////////////////////////////////////////
-  export const getReportsByRoleAndType = async (role, type) => {
-    try {
-      const reportsCollection = collection(db, "Reports");
-      const q = query(
-        reportsCollection,
-        where("role", "==", role),
-        where("type", "==", type)
-      );
-      const querySnapshot = await getDocs(q);
   
-      return querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-    } catch (error) {
-      console.error("Error fetching reports:", error);
-      throw error;
-    }
-  };
-  ///////////////////////////////////////////
   
 
   //end attili
