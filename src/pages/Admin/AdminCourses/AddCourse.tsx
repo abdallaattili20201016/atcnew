@@ -7,8 +7,8 @@ import { db } from "../../../App";
 import { getAuth } from "firebase/auth"; // Import Firebase Auth for the user info
 import BreadCrumb from "../../../Common/BreadCrumb";
 
-const NewAnnouncement = () => {
-  document.title = "New Announcement | Admin Dashboard";
+const AddCourse = () => {
+  document.title = "Add New Course | Admin Dashboard";
 
   const auth = getAuth(); // Get the authenticated user
   const currentUser = auth.currentUser;
@@ -17,22 +17,24 @@ const NewAnnouncement = () => {
   const validationSchema = Yup.object({
     title: Yup.string().required("Title is required"),
     description: Yup.string().required("Description is required"),
-    status: Yup.string().required("Please select a status"),
+    duration: Yup.string().required("Duration is required"),
+    trainer: Yup.string().required("Trainer is required"),
   });
 
   const formik = useFormik({
     initialValues: {
       title: "",
       description: "",
-      status: "active",
+      duration: "",
+      trainer: "",
     },
     validationSchema,
     onSubmit: async (
-      values: { title: string; description: string; status: string },
+      values: { title: string; description: string; duration: string; trainer: string },
       { resetForm }: { resetForm: () => void }
     ) => {
       try {
-        await addDoc(collection(db, "Announcements"), {
+        await addDoc(collection(db, "Courses"), {
           ...values,
           createdOn: serverTimestamp(),
           createdBy: currentUser
@@ -43,11 +45,11 @@ const NewAnnouncement = () => {
               }
             : "Unknown User", // Fallback if no user is logged in
         });
-        alert("Announcement created successfully!");
+        alert("Course added successfully!");
         resetForm();
       } catch (error) {
-        console.error("Error creating announcement:", error);
-        alert("Failed to create announcement. Please try again.");
+        console.error("Error adding course:", error);
+        alert("Failed to add course. Please try again.");
       }
     },
   });
@@ -57,22 +59,22 @@ const NewAnnouncement = () => {
       <div className="page-content">
         <Container fluid>
           {/* Breadcrumb */}
-          <BreadCrumb pageTitle="New Announcement" title="Announcements" />
+          <BreadCrumb pageTitle="Add New Course" title="Courses" />
 
           <Row className="justify-content-center">
             <Col xxl={9}>
               <Card>
                 <Card.Body>
-                  <h4 className="card-title mb-4">Create New Announcement</h4>
+                  <h4 className="card-title mb-4">Add New Course</h4>
                   <Form onSubmit={formik.handleSubmit}>
                     <Row className="mb-3">
                       <Col md={12}>
                         <Form.Group>
-                          <Form.Label>Title</Form.Label>
+                          <Form.Label>Course Title</Form.Label>
                           <Form.Control
                             type="text"
                             name="title"
-                            placeholder="Enter announcement title"
+                            placeholder="Enter course title"
                             value={formik.values.title}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
@@ -93,7 +95,7 @@ const NewAnnouncement = () => {
                             as="textarea"
                             name="description"
                             rows={5}
-                            placeholder="Enter announcement description"
+                            placeholder="Enter course description"
                             value={formik.values.description}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
@@ -111,19 +113,36 @@ const NewAnnouncement = () => {
                     <Row className="mb-3">
                       <Col md={6}>
                         <Form.Group>
-                          <Form.Label>Status</Form.Label>
-                          <Form.Select
-                            name="status"
-                            value={formik.values.status}
+                          <Form.Label>Duration</Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="duration"
+                            placeholder="e.g., 4 weeks"
+                            value={formik.values.duration}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
-                            isInvalid={formik.touched.status && !!formik.errors.status}
-                          >
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                          </Form.Select>
+                            isInvalid={formik.touched.duration && !!formik.errors.duration}
+                          />
                           <Form.Control.Feedback type="invalid">
-                            {formik.errors.status}
+                            {formik.errors.duration}
+                          </Form.Control.Feedback>
+                        </Form.Group>
+                      </Col>
+
+                      <Col md={6}>
+                        <Form.Group>
+                          <Form.Label>Trainer</Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="trainer"
+                            placeholder="Enter trainer name"
+                            value={formik.values.trainer}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            isInvalid={formik.touched.trainer && !!formik.errors.trainer}
+                          />
+                          <Form.Control.Feedback type="invalid">
+                            {formik.errors.trainer}
                           </Form.Control.Feedback>
                         </Form.Group>
                       </Col>
@@ -131,7 +150,7 @@ const NewAnnouncement = () => {
 
                     <div className="text-end">
                       <Button type="submit" variant="primary">
-                        Create Announcement
+                        Add Course
                       </Button>
                     </div>
                   </Form>
@@ -145,4 +164,4 @@ const NewAnnouncement = () => {
   );
 };
 
-export default NewAnnouncement;
+export default AddCourse;
