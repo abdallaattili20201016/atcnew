@@ -91,7 +91,7 @@ const TrainerNavdata = () => {
       id: "TrainerReports",
       label: "Reports",
       icon: "las la-house-damage",
-      link: "/trainerreports",
+      link: "/adminreports",
     },
     {
       label: "More",

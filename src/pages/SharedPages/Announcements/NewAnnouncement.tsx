@@ -5,7 +5,7 @@ import * as Yup from "yup";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../../../App";
 import { getAuth } from "firebase/auth"; // Import Firebase Auth for the user info
-import BreadCrumb from "../../../Common/BreadCrumb";
+import { toast } from "react-toastify";
 
 const NewAnnouncement = () => {
   document.title = "New Announcement | Admin Dashboard";
@@ -46,11 +46,11 @@ const NewAnnouncement = () => {
           : {  email: "unknown", displayName: "Unknown User" }
         
         });
-        alert("Announcement created successfully!");
+        toast.success("Announcement created successfully!");
         resetForm();
       } catch (error) {
         console.error("Error creating announcement:", error);
-        alert("Failed to create announcement. Please try again.");
+        toast.error("Failed to create announcement. Please try again.");
       }
     },
   });
@@ -59,8 +59,7 @@ const NewAnnouncement = () => {
     <React.Fragment>
       <div className="page-content">
         <Container fluid>
-          {/* Breadcrumb */}
-          <BreadCrumb pageTitle="New Announcement" title="Announcements" />
+
 
           <Row className="justify-content-center">
             <Col xxl={9}>
