@@ -21,14 +21,18 @@ const VerticalLayout = (props: any) => {
     if (user_details) {
       const user = JSON.parse(user_details);
       if (user.status === 1) {
+        
+      if (user.role === "admin") {
         setNavData(navdata.AdminNavdata().props.children);
       }
+      
       if (user.role === "trainer") {
         setNavData(navdata.TrainerNavdata().props.children);
       }
       if (user.role === "trainee") {
         setNavData(navdata.TraineeNavdata().props.children);
       }
+    }
     }
     setLoading(false);
   }, []);
