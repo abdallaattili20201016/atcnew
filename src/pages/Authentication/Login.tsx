@@ -78,7 +78,7 @@ const Login = () => {
                     <div className="text-center mb-5">
                       <Link to="/">
                         <span className="logo-lg">
-                          <img src={logoDark} alt="" height="45" width="180" />
+                          <img src={logoDark} alt="" height="300" width="543" />
                         </span>
                       </Link>
                     </div>
@@ -88,9 +88,9 @@ const Login = () => {
                         <Col lg={12}>
                           <Card.Body className="p-lg-5 p-4">
                             <div className="text-center">
-                              <h5 className="mb-0">Welcome Back !</h5>
+                              <h5 className="mb-0">Welcome Back!</h5>
                               <p className="text-muted mt-2">
-                                Sign in to continue to Academice Training Cente.
+                                Sign in to continue to Academic Training Center.
                               </p>
                             </div>
 
@@ -114,7 +114,7 @@ const Login = () => {
                                       name="email"
                                       id="email"
                                       className="form-control bg-light border-light password-input"
-                                      placeholder="Enter username"
+                                      placeholder="Enter email"
                                       onChange={validation.handleChange}
                                       onBlur={validation.handleBlur}
                                       value={validation.values.email || ""}
