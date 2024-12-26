@@ -78,7 +78,7 @@ const Login = () => {
                     <div className="text-center mb-5">
                       <Link to="/">
                         <span className="logo-lg">
-                          <img src={logoDark} alt="" height="300" width="543" />
+                          <img src={logoDark} alt="" height="100" width="181" />
                         </span>
                       </Link>
                     </div>
