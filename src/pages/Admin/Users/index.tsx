@@ -3,7 +3,7 @@ import UserTable from './UserTable';
 import { Container } from 'react-bootstrap';
 
 const Users = () => {
-  document.title = "User";
+  document.title = "User | Academic Training Center";
 
   const [isShow, setIsShow] = useState(false);
 
