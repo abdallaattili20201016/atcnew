@@ -49,7 +49,7 @@ const UserProfile: React.FC = () => {
       const data = await firebaseBackend.getUserDetailsByUid(uid);
       if (data) {
         setCity(data.city);
-        setStreet(data.street);
+        setStreet(data.address.street);
         setUsername(data.username);
         setEmail(data.email);
         setPhone(data.phone);
