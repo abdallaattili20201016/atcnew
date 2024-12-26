@@ -93,6 +93,7 @@ const AddUsers = ({ isShow, handleClose, handleShow }: userProps) => {
               type="button"
               className="btn-close"
               onClick={handleClose}
+              title="Close"
             ></button>
           </Modal.Header>
           <Modal.Body className="p-4">

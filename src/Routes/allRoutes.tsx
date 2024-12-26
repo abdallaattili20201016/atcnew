@@ -19,6 +19,7 @@ import Users from "../pages/Admin/Users";
 import AdminCourses from "../pages/Admin/AdminCourses/AdminCourses";
 import AddCourse from "../pages/Admin/AdminCourses/AddCourse";
 import CourseDetails from "../pages/SharedPages/CourseDetails";
+import AddUserPage from "../pages/Admin/Users/AddUserPage";
 
 
 interface RouteObject {
@@ -31,8 +32,8 @@ const authProtectedRoutes: Array<RouteObject> = [
   // Dashboard
   { path: "/index", component: <Dashboard /> },
   { path: "/dashboard", component: <Dashboard /> },
-  { path: "/", exact: true, component: <Navigate to="/dashboard" /> },
-  { path: "*", component: <Navigate to="/dashboard" /> },
+  { path: "/", exact: true, component: <Navigate to="/login" /> },
+  { path: "*", component: <Navigate to="/login" /> },
 
   { path: "/trainer-courses-list", component: <TrainerCoursesList /> },
   { path: "/users", component: <Users /> },
@@ -50,6 +51,7 @@ const authProtectedRoutes: Array<RouteObject> = [
 
   //admin
   { path: "/adminreports", component: <AdminReports /> },
+  { path: "/add-user", component: <AddUserPage /> },
   // Admin Announcements
   { path: "/announcements-table", component: <AdminAnnouncementsTable /> },
   { path: "/admin-announcements/new", component: <CreateAnnouncement /> },
