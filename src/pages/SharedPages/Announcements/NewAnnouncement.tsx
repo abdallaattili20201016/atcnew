@@ -11,7 +11,9 @@ const NewAnnouncement = () => {
   document.title = "New Announcement | Admin Dashboard";
 
   const auth = getAuth(); // Get the authenticated user
-  const currentUser = auth.currentUser;
+  //const currentUser = auth.currentUser;
+  
+  const currentUser = JSON.parse(sessionStorage.getItem("user_details") || '{}'); // Get the authenticated user
 
   // Form validation with Yup
   const validationSchema = Yup.object({
@@ -36,12 +38,13 @@ const NewAnnouncement = () => {
           ...values,
           createdOn: serverTimestamp(),
           createdBy: currentUser
-            ? {
-                uid: currentUser.uid,
-                email: currentUser.email,
-                displayName: currentUser.displayName || "Unknown User",
-              }
-            : "Unknown User", // Fallback if no user is logged in
+          ? {
+              
+              email: currentUser.email,
+              displayName: currentUser.username || "Unknown User",
+            }
+          : {  email: "unknown", displayName: "Unknown User" }
+        
         });
         alert("Announcement created successfully!");
         resetForm();
