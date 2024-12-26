@@ -90,7 +90,7 @@ const Login = () => {
                             <div className="text-center">
                               <h5 className="mb-0">Welcome Back !</h5>
                               <p className="text-muted mt-2">
-                                Sign in to continue to PULSE.
+                                Sign in to continue to ATC.
                               </p>
                             </div>
 

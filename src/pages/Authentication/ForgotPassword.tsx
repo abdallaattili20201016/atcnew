@@ -57,7 +57,7 @@ const ForgotPassword = (props: any) => {
                             <div className="text-center">
                               <h5 className="mb-0">Forgot Password?</h5>
                               <p className="text-muted mt-2">
-                                Reset password with PULSE
+                                Reset password
                               </p>
                             </div>
 

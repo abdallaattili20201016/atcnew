@@ -3,7 +3,7 @@ import UserTable from './UserTable';
 import { Container } from 'react-bootstrap';
 
 const Users = () => {
-  document.title = "User | PULSE";
+  document.title = "User";
 
   const [isShow, setIsShow] = useState(false);
 
