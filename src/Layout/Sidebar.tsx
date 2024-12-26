@@ -15,7 +15,7 @@ const Sidebar = ({ layoutType }: any) => {
         <div className="navbar-brand-box">
           <Link to="/dashboard" className="logo logo-light">
             <span className="logo-lg">
-              <img src={logoLight} alt="" height="30" width="110" />
+              <img src={logoLight} alt="" height="120" width="218" />
             </span>
           </Link>
         </div>
