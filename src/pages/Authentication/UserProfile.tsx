@@ -21,6 +21,7 @@ import { getFirebaseBackend } from "../../helpers/firebase_helper";
 import { toast } from "react-toastify";
 import { storage } from "../../App"; // Assuming you've set up Firebase storage helper
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import LoadingIcon from '../../components/LoadingIcon';
 
 interface ProfileState {
   user: {
@@ -43,6 +44,7 @@ const UserProfile: React.FC = () => {
   const [city, setCity] = useState<string>("");
   const [street, setStreet] = useState<string>("");
   const [avatarURL, setAvatarURL] = useState<string>(""); // Initial avatar state
+  const [loading, setLoading] = useState<boolean>(false);
 
   const loadUserName = async (uid: string) => {
     try {
@@ -80,6 +82,7 @@ const UserProfile: React.FC = () => {
       street: Yup.string().required("Please enter your street"),
     }),
     onSubmit: async (values: any) => {
+      setLoading(true);
       try {
         console.log("Submitting form with values:", values);
 
@@ -131,6 +134,8 @@ const UserProfile: React.FC = () => {
       } catch (error) {
         console.error("Error updating profile:", error);
         toast.error("Profile update failed", { autoClose: 2000 });
+      } finally {
+        setLoading(false);
       }
     },
   });
@@ -245,10 +250,11 @@ const UserProfile: React.FC = () => {
                           </div>
 
                           <div className="text-center mt-4">
-                            <Button type="submit" variant="danger">
-                              Update Profile
+                            <Button type="submit" variant="danger" disabled={loading}>
+                              {loading ? "Updating..." : "Update Profile"}
                             </Button>
                           </div>
+                          {loading && <LoadingIcon />}
                         </Form>
                       </Card.Body>
                     </Card>
