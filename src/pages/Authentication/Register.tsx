@@ -292,7 +292,8 @@ const Register = () => {
                                   >
                                     <option value="">Select a role</option>
                                     <option value="admin">Admin</option>
-                                    <option value="manager">Manager</option>
+                                    <option value="trainer">Trainer</option>
+                                    <option value="trainee">Trainee</option>
                                     <option value="user">User</option>
                                   </Form.Select>
                                   <Form.Control.Feedback type="invalid">
@@ -313,13 +314,6 @@ const Register = () => {
                                   </button>
                                 </div>
 
-                                <div className="mt-4 text-center">
-                                  <div className="signin-other-title">
-                                    <h5 className="fs-15 mb-3 title">
-                                      Have an Acoount
-                                    </h5>
-                                  </div>
-                                </div>
 
                                 <div className="mt-4 text-center">
                                   <p className="mb-0">
