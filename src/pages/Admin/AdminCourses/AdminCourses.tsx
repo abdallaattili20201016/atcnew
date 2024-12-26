@@ -73,7 +73,7 @@ const AdminCourses = () => {
                                 variant="primary"
                                 className="btn-animation mt-2"
                                 data-text="View Details"
-                                onClick={() => navigate(`/admin-courses/${course.id}`)}
+                                onClick={() => navigate(`/courses/${course.id}`)}
                               >
                                 <span>View Details</span>
                               </Button>
