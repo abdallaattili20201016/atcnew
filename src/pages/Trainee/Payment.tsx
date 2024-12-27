@@ -3,6 +3,8 @@ import { Card, Container, Row, Col, Button, Table } from "react-bootstrap";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../../App";
 import moment from "moment";
+import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 
 const Payment = () => {
   document.title = "Payment | Trainee Dashboard";
@@ -17,7 +19,7 @@ const Payment = () => {
   // Fetch payment history
   const fetchPayments = async () => {
     if (!currentUser.uid) {
-      alert("Unable to fetch payments. Please log in.");
+      toast.error("Unable to fetch payments. Please log in.");
       return;
     }
 
@@ -44,7 +46,7 @@ const Payment = () => {
       setTotalAmount(total);
     } catch (error) {
       console.error("Error fetching payments:", error);
-      alert("Failed to fetch payment history.");
+      toast.error("Failed to fetch payment history.");
     } finally {
       setIsLoading(false);
     }
