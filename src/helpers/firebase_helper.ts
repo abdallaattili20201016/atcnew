@@ -4,7 +4,7 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import "firebase/compat/firestore";
 import "firebase/compat/storage";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc, deleteDoc } from "firebase/firestore";
 import { toast } from "react-toastify";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
@@ -364,7 +364,20 @@ class FirebaseAuthBackend {
   };
   ///////////////////////////////////////////
   
-  
+  /**
+   * Deletes a user from Firestore.
+   */
+  deleteUser = async (userId: string) => {
+    try {
+      console.log(`Attempting to delete user with ID: ${userId}`);
+      const userDoc = this.firestore.collection("users").doc(userId);
+      await userDoc.delete();
+      console.log(`User with ID: ${userId} deleted successfully`);
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      throw error;
+    }
+  };
 
   //end attili
 

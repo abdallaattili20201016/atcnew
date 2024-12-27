@@ -1,17 +1,17 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
-import { Card, Col, Dropdown, Form, Row, Button } from "react-bootstrap";
+import { Card, Col, Form, Row, Button, Modal } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
-import { collection, getDocs, addDoc } from 'firebase/firestore';
+import { ToastContainer, toast } from "react-toastify";
+import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../../App"; // Adjust to your firebase config path
 
 import moment from "moment";
 import "firebase/storage";
 import TableContainer from "../../../Common/Tabledata/TableContainer";
 import NoSearchResult from "../../../Common/Tabledata/NoSearchResult";
-import AddUsers from "../../../Common/CrudModal/AddUsers";
 import EditUsers from "../../../Common/CrudModal/EditUsers";
 import { getFirebaseBackend } from "../../../helpers/firebase_helper";
+import "react-toastify/dist/ReactToastify.css";
 
 interface userProps {
   isShow: any;
@@ -27,47 +27,48 @@ const UserTable = ({ isShow, hideUserModal }: userProps) => {
 
   const handleShowAddUser = async () => {
     setShowAddUser(true);
-    // Example create:
-    // await addDoc(collection(db, 'users'), { firstName: 'John', lastName: 'Doe' });
-    // fetchUsers(); // re-fetch after adding
   };
 
   const handleCloseAddUser = () => {
     setShowAddUser(false);
   };
 
-  const handleOpenFile = (item: any) => {
-    const commercialRegisterUrl = item.commercial_register; // Get the URL from the user data
-
-    if (commercialRegisterUrl) {
-      // Open the PDF in a new tab
-      window.open(commercialRegisterUrl, "_blank");
-    } else {
-      // Handle the case where no commercial register URL is found
-      alert("Commercial Register not available.");
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      console.log(`Deleting user with ID: ${userId}`);
+      await firebaseBackend.deleteUser(userId);
+      toast.success("User deleted successfully.");
+      loadUsers(); // Re-fetch users after deletion
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error("Failed to delete user.");
     }
   };
+
   const loadUsers = async (item?: undefined) => {
     try {
       setIsLoading(true);
       const usersList = await firebaseBackend.fetchUsers(item);
       setUsers(usersList);
     } catch (error) {
-      console.error("Error loading userss:", error);
+      console.error("Error loading users:", error);
+      toast.error("Error loading users.");
     } finally {
       setIsLoading(false);
     }
   };
+
   useEffect(() => {
     const fetchUsers = async () => {
-      const snapshot = await getDocs(collection(db, 'users'));
-      const userData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const snapshot = await getDocs(collection(db, "users"));
+      const userData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
       setUsers(userData);
     };
     fetchUsers();
   }, [firebaseBackend]);
-
-  // Delete modal
 
   const [delet, setDelet] = useState<boolean>(false);
   const [deletid, setDeletid] = useState<any>();
@@ -76,24 +77,13 @@ const UserTable = ({ isShow, hideUserModal }: userProps) => {
     (id: any) => {
       setDelet(!delet);
       setDeletid(id);
+      handleDeleteUser(id); // Call handleDeleteUser directly for testing
     },
     [delet]
   );
 
-  // // search
-  // const handleSearch = (ele: any) => {
-  //     let item = ele.value;
-
-  //     if (item === "All Tasks") {
-  //         setUsers([...usersList]);
-  //     } else {
-  //         handleSearchData({ data: usersList, item: item, setState: setUsers })
-  //     }
-  // }
-  // search
   const handleSearch = async (ele: any) => {
     const item = ele.value.trim(); // Trim whitespace
-
     loadUsers(item);
   };
 
@@ -104,6 +94,7 @@ const UserTable = ({ isShow, hideUserModal }: userProps) => {
     if (reset) loadUsers();
     setEditUser(false);
   };
+
   const handleEditUser = (item: any) => {
     setEditUser(true);
     setEdit(item);
@@ -182,8 +173,7 @@ const UserTable = ({ isShow, hideUserModal }: userProps) => {
             case 2:
               return (
                 <span className="badge bg-info-subtle text-primary p-2">
-                  
-                  {cell.row.original.role}  
+                  {cell.row.original.role}
                 </span>
               );
             default:
@@ -196,7 +186,6 @@ const UserTable = ({ isShow, hideUserModal }: userProps) => {
         accessor: "action",
         Filter: false,
         style: { width: "12%" },
-
         isSortable: false,
         Cell: (cell: any) => (
           <ul className="list-inline hstack gap-2 mb-0">
@@ -215,16 +204,15 @@ const UserTable = ({ isShow, hideUserModal }: userProps) => {
               className="list-inline-item"
               onClick={() => {
                 const item = cell.row.original;
-                handleDeleteModal(item);
+                handleDeleteModal(item.id);
               }}
             >
               <Link
                 to="#"
                 className="btn btn-soft-danger btn-sm d-inline-block"
-                onClick={() => handleOpenFile(cell.row.original)}
-                title="Open Commercial Register"
+                title="Delete User"
               >
-                <i className="las la-file-download fs-17 align-middle"></i>
+                <i className="las la-trash fs-17 align-middle"></i>
               </Link>
             </li>
           </ul>
@@ -278,11 +266,19 @@ const UserTable = ({ isShow, hideUserModal }: userProps) => {
       <Button variant="primary" onClick={() => navigate("/add-user")}>
         Create User
       </Button>
-      {/* Removed <AddUsers> component */}
 
-      <EditUsers isShow={editUser} handleClose={handleCloseEdit} edit={edit} />
+      <Modal
+        show={editUser}
+        onHide={() => handleCloseEdit(false)}
+        backdrop="static"
+      >
+        <EditUsers
+          isShow={editUser}
+          handleClose={handleCloseEdit}
+          edit={edit}
+        />
+      </Modal>
 
-      {/* <DeleteModal show={delet} handleClose={handleDeleteModal} deleteModalFunction={handleDeleteId} /> */}
       <ToastContainer />
     </React.Fragment>
   );

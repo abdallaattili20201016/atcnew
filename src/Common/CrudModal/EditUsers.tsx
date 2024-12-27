@@ -64,9 +64,9 @@ const EditUsers = ({ isShow, handleClose, edit }: usereditProps) => {
   useEffect(() => {
     setSelectedImage(edit?.memberImage);
   }, [edit]);
-
+  
   return (
-    <Modal centered show={isShow} onHide={() => handleClose(false)}>
+    <Modal centered show={isShow} onHide={() => handleClose(false)} backdrop="static" style={{ zIndex: 1050 }}>
       <div className="modal-content border-0">
         <Modal.Header className="p-4 pb-0">
           <Modal.Title as="h5">Edit User Status</Modal.Title>
@@ -146,7 +146,6 @@ const EditUsers = ({ isShow, handleClose, edit }: usereditProps) => {
                     <option value="0">Pending</option>
                     <option value="1">Admin</option>
                     <option value="2">User</option>
-                   
                     <option value="-1">Rejected</option>
                   </Form.Select>
                   {formik.touched.status && formik.errors.status && (
