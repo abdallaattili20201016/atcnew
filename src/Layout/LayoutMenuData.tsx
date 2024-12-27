@@ -130,6 +130,13 @@ const TraineeNavdata = () => {
       icon: "las la-house-damage",
       link: "/trainer-courses-list",
     },
+
+    {
+      id: "payment",
+      label: "Payment",
+      icon: "las la-house-damage",
+      link: "/payment",
+    },
     {
       label: "More",
       isHeader: true,
