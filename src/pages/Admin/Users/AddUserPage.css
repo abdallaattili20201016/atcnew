@@ -1,0 +1,56 @@
+.add-user-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 2rem;
+}
+
+.card {
+  border-radius: 10px;
+}
+
+.add-user-card {
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.add-user-card-header {
+  background: #007bff;
+  color: #fff;
+  padding: 1.5rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.card-header {
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.card-body {
+  padding: 2rem;
+}
+
+.form-control {
+  border-radius: 10px;
+  padding: 0.75rem;
+  font-size: 1rem;
+}
+
+.btn-primary {
+  border-radius: 10px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  background: #007bff;
+  border: none;
+  transition: background 0.3s ease;
+}
+
+.submit-btn:hover {
+  background: #0056b3;
+}
