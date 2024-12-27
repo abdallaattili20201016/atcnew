@@ -276,7 +276,7 @@ const UserTable = ({ isShow, hideUserModal }: userProps) => {
       </Row>
 
       <Button variant="primary" onClick={() => navigate("/add-user")}>
-        Create User
+        Add New User
       </Button>
       {/* Removed <AddUsers> component */}
 
