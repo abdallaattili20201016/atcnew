@@ -41,6 +41,9 @@ const EditUsers = ({ isShow, handleClose, edit }: usereditProps) => {
       status: (edit && edit.status) || "",
     },
     validationSchema: Yup.object({
+      memberName: Yup.string().required("Member name is required"),
+      email: Yup.string().email("Invalid email address").required("Email is required"),
+      mobile: Yup.string().required("Mobile number is required"),
       status: Yup.string().required("Please choose Your status"),
     }),
 
@@ -50,11 +53,11 @@ const EditUsers = ({ isShow, handleClose, edit }: usereditProps) => {
         console.log("Submitting form with values:", values);
         await firebaseBackend.updateUserById(edit.id, values);
         formik.resetForm();
-        toast.success("User Status Updated Successfully", { autoClose: 2000 });
+        toast.success("User Details Updated Successfully", { autoClose: 2000 });
         handleClose(true);
       } catch (error) {
         console.error("Error updating user:", error);
-        toast.error("Failed to update user status. Please try again.");
+        toast.error("Failed to update user details. Please try again.");
       } finally {
         setIsSubmitting(false);
       }
@@ -64,12 +67,12 @@ const EditUsers = ({ isShow, handleClose, edit }: usereditProps) => {
   useEffect(() => {
     setSelectedImage(edit?.memberImage);
   }, [edit]);
-  
+
   return (
     <Modal centered show={isShow} onHide={() => handleClose(false)} backdrop="static" style={{ zIndex: 1050 }}>
       <div className="modal-content border-0">
         <Modal.Header className="p-4 pb-0">
-          <Modal.Title as="h5">Edit User Status</Modal.Title>
+          <Modal.Title as="h5">Edit User Details</Modal.Title>
           <button
             type="button"
             className="btn-close"
@@ -83,43 +86,58 @@ const EditUsers = ({ isShow, handleClose, edit }: usereditProps) => {
         <Modal.Body className="p-4">
           <Form noValidate onSubmit={formik.handleSubmit}>
             <div className="mb-3">
-              <Form.Label htmlFor="users">Member Name</Form.Label>
+              <Form.Label htmlFor="memberName">Member Name</Form.Label>
               <Form.Control
                 type="text"
                 id="memberName"
                 name="memberName"
                 placeholder="Enter member name"
-                className="bg-light text-muted"
-                disabled
                 value={formik.values.memberName || ""}
+                onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
+                isInvalid={!!formik.errors.memberName}
               />
+              {formik.touched.memberName && formik.errors.memberName && (
+                <Form.Control.Feedback type="invalid">
+                  {formik.errors.memberName}
+                </Form.Control.Feedback>
+              )}
             </div>
             <div className="mb-3">
-              <Form.Label htmlFor="Email-input">Email</Form.Label>
+              <Form.Label htmlFor="email">Email</Form.Label>
               <Form.Control
                 type="text"
-                id="Email-input"
+                id="email"
                 name="email"
-                className="bg-light text-muted"
-                disabled
-                placeholder="Enter Your email"
+                placeholder="Enter email"
                 value={formik.values.email || ""}
+                onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
+                isInvalid={!!formik.errors.email}
               />
+              {formik.touched.email && formik.errors.email && (
+                <Form.Control.Feedback type="invalid">
+                  {formik.errors.email}
+                </Form.Control.Feedback>
+              )}
             </div>
             <div className="mb-3">
-              <Form.Label htmlFor="users">Mobile</Form.Label>
+              <Form.Label htmlFor="mobile">Mobile</Form.Label>
               <PatternFormat
                 id="mobile"
                 name="mobile"
-                className="form-control bg-light text-muted"
-                placeholder="Enter Your Mobile Number"
+                className="form-control"
+                placeholder="Enter mobile number"
                 value={formik.values.mobile || ""}
+                onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 format="###-###-####"
-                disabled
               />
+              {formik.touched.mobile && formik.errors.mobile && (
+                <Form.Control.Feedback type="invalid">
+                  {formik.errors.mobile}
+                </Form.Control.Feedback>
+              )}
             </div>
             <Row>
               <Col lg={12}>
@@ -128,15 +146,11 @@ const EditUsers = ({ isShow, handleClose, edit }: usereditProps) => {
                     Status<span className="text-danger">*</span>
                   </label>
                   <Form.Select
-                    id="paymentType"
+                    id="status"
                     name="status"
                     value={formik.values.status || ""}
                     onChange={(e) => {
-                      // Convert the status to a number if necessary
-                      const value =
-                        e.target.value === ""
-                          ? ""
-                          : parseInt(e.target.value, 10);
+                      const value = e.target.value === "" ? "" : parseInt(e.target.value, 10);
                       formik.setFieldValue("status", value);
                     }}
                     onBlur={formik.handleBlur}
@@ -172,7 +186,7 @@ const EditUsers = ({ isShow, handleClose, edit }: usereditProps) => {
                 className="btn btn-success"
                 disabled={isSubmitting || !formik.isValid || !formik.dirty}
               >
-                {isSubmitting ? "Updating..." : "Update Status"}
+                {isSubmitting ? "Updating..." : "Update Details"}
               </Button>
             </div>
           </Form>

@@ -198,18 +198,22 @@ class FirebaseAuthBackend {
   // Function to update a user by ID
   async updateUserById(id: string, updatedData: any) {
     try {
-      console.log("Submitting form with values2:", updatedData);
-      const productRef = this.firestore.collection("users").doc(id);
+      console.log("Submitting form with values:", updatedData);
+      const userRef = this.firestore.collection("users").doc(id);
 
       // Make sure the document exists
-      const docSnapshot = await productRef.get();
+      const docSnapshot = await userRef.get();
       if (!docSnapshot.exists) {
         console.error("Document not found");
         return;
       }
 
-      await productRef.update({
+      await userRef.update({
+        username: updatedData.memberName,
+        email: updatedData.email,
+        phone: updatedData.mobile,
         status: updatedData.status,
+        picture: updatedData.memberImage,
       });
 
       console.log("User updated successfully");
