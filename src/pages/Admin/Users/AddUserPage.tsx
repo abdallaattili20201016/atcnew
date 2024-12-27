@@ -1,107 +1,221 @@
 import React, { useState } from "react";
-import { Button, Form, Container, Row, Col, Card } from "react-bootstrap";
+import { Button, Form, Container, Row, Col, Card, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { getFirebaseBackend } from "../../../helpers/firebase_helper";
+import "react-toastify/dist/ReactToastify.css";
+import { toast, Slide, ToastContainer } from "react-toastify";
+import "./AddUserPage.css"; // Custom CSS file for additional styling
 
 const AddUserPage: React.FC = () => {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [phone, setPhone] = useState("");
-  const [city, setCity] = useState("");
-  const [role, setRole] = useState("");
   const navigate = useNavigate();
+  const firebaseBackend = getFirebaseBackend();
+  const [loader, setLoader] = useState<boolean>(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("User added:", { username, email, password, phone, city, role });
-    // Call your API or service
-    navigate("/users");
-  };
+  const successnotify = () =>
+    toast("Your application was successfully sent", {
+      position: "top-center",
+      hideProgressBar: true,
+      closeOnClick: false,
+      className: "bg-success text-white",
+      transition: Slide,
+    });
+
+  const errornotify = (message: string) =>
+    toast(`Error! ${message}`, {
+      position: "top-center",
+      hideProgressBar: true,
+      closeOnClick: false,
+      className: "bg-danger text-white",
+      transition: Slide,
+    });
+
+  const validation = useFormik({
+    enableReinitialize: true,
+    initialValues: {
+      email: "",
+      username: "",
+      password: "",
+      phone: "",
+      city: "",
+      role: "",
+    },
+    validationSchema: Yup.object({
+      email: Yup.string().required("Please Enter Email"),
+      username: Yup.string().required("Please Enter Username"),
+      password: Yup.string()
+        .required("Please Enter Password")
+        .matches(
+          /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}/,
+          "Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character"
+        ),
+      phone: Yup.string()
+        .required("Please Enter Phone Number")
+        .matches(/^[0-9]+$/, "Phone number must only contain numbers")
+        .min(10, "Phone number must be at least 10 digits"),
+      city: Yup.string().required("Please Enter City"),
+      role: Yup.string().required("Please select the role Register"),
+    }),
+    onSubmit: async (values: any) => {
+      setLoader(true);
+      try {
+        const response = await firebaseBackend.registerUser(
+          values.email,
+          values.password
+        );
+
+        if (response) {
+          await firebaseBackend.addNewUserToFirestore(values);
+          successnotify();
+          navigate("/users");
+        }
+      } catch (error: any) {
+        switch (error.code) {
+          case 'auth/email-already-in-use':
+            errornotify("This email is already in use.");
+            break;
+          case 'auth/invalid-email':
+            errornotify("Invalid email address.");
+            break;
+          case 'auth/weak-password':
+            errornotify("The password is too weak.");
+            break;
+          case 'auth/operation-not-allowed':
+            errornotify("Email/password accounts are not enabled.");
+            break;
+          case 'auth/too-many-requests':
+            errornotify("Too many requests. Please try again later.");
+            break;
+          case 'auth/network-request-failed':
+            errornotify("Network error. Please check your connection.");
+            break;
+          case 'auth/internal-error':
+            errornotify("An internal error occurred. Please try again.");
+            break;
+          default:
+            errornotify(error.message); // Display the actual error message
+            break;
+        }
+      } finally {
+        setLoader(false);
+      }
+    },
+  });
 
   return (
-    <Container className="d-flex align-items-center justify-content-center" style={{ minHeight: "100vh" }}>
+    <Container className="d-flex align-items-center justify-content-center add-user-container">
       <Row className="w-100 justify-content-center">
         <Col md={6}>
-          <Card className="shadow-lg border-0">
-            <Card.Header className="bg-primary text-white text-center">
+          <Card className="shadow-lg border-0 add-user-card">
+            <Card.Header className="text-center add-user-card-header">
               <h4 className="mb-0">Add User</h4>
             </Card.Header>
             <Card.Body>
-              <Form onSubmit={handleSubmit}>
+              <Form onSubmit={validation.handleSubmit}>
                 <Form.Group controlId="username" className="mb-3">
                   <Form.Label>Name</Form.Label>
                   <Form.Control
                     type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    name="username"
                     placeholder="Enter name"
-                    required
+                    value={validation.values.username}
+                    onChange={validation.handleChange}
+                    onBlur={validation.handleBlur}
+                    isInvalid={!!validation.errors.username}
                   />
+                  <Form.Control.Feedback type="invalid">
+                    {validation.errors.username}
+                  </Form.Control.Feedback>
                 </Form.Group>
 
                 <Form.Group controlId="email" className="mb-3">
                   <Form.Label>Email</Form.Label>
                   <Form.Control
                     type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    name="email"
                     placeholder="Enter email"
-                    required
+                    value={validation.values.email}
+                    onChange={validation.handleChange}
+                    onBlur={validation.handleBlur}
+                    isInvalid={!!validation.errors.email}
                   />
+                  <Form.Control.Feedback type="invalid">
+                    {validation.errors.email}
+                  </Form.Control.Feedback>
                 </Form.Group>
 
                 <Form.Group controlId="password" className="mb-3">
                   <Form.Label>Password</Form.Label>
                   <Form.Control
                     type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    name="password"
                     placeholder="Enter password"
-                    required
+                    value={validation.values.password}
+                    onChange={validation.handleChange}
+                    onBlur={validation.handleBlur}
+                    isInvalid={!!validation.errors.password}
                   />
+                  <Form.Control.Feedback type="invalid">
+                    {validation.errors.password}
+                  </Form.Control.Feedback>
                 </Form.Group>
 
                 <Form.Group controlId="phone" className="mb-3">
                   <Form.Label>Phone</Form.Label>
                   <Form.Control
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    type="text"
+                    name="phone"
                     placeholder="Enter phone number"
-                    required
+                    value={validation.values.phone}
+                    onChange={validation.handleChange}
+                    onBlur={validation.handleBlur}
+                    isInvalid={!!validation.errors.phone}
                   />
+                  <Form.Control.Feedback type="invalid">
+                    {validation.errors.phone}
+                  </Form.Control.Feedback>
                 </Form.Group>
 
                 <Form.Group controlId="city" className="mb-3">
                   <Form.Label>City</Form.Label>
                   <Form.Control
                     type="text"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
+                    name="city"
                     placeholder="Enter city"
-                    required
+                    value={validation.values.city}
+                    onChange={validation.handleChange}
+                    onBlur={validation.handleBlur}
+                    isInvalid={!!validation.errors.city}
                   />
+                  <Form.Control.Feedback type="invalid">
+                    {validation.errors.city}
+                  </Form.Control.Feedback>
                 </Form.Group>
 
-                <Form.Group controlId="role" className="mb-4">
-                  <Form.Label htmlFor="role">Role</Form.Label>
+                <Form.Group controlId="role" className="mb-3">
+                  <Form.Label>Role</Form.Label>
                   <Form.Select
-                    id="role"
-                    value={role}
-                    onChange={(e) => setRole(e.target.value)}
-                    required
-                    aria-label="Role"
+                    name="role"
+                    value={validation.values.role}
+                    onChange={validation.handleChange}
+                    onBlur={validation.handleBlur}
+                    isInvalid={!!validation.errors.role}
                   >
-                    <option value="">Select Role</option>
+                    <option value="">Select a role</option>
                     <option value="admin">Admin</option>
                     <option value="trainer">Trainer</option>
                     <option value="trainee">Trainee</option>
+                    <option value="user">User</option>
                   </Form.Select>
+                  <Form.Control.Feedback type="invalid">
+                    {validation.errors.role}
+                  </Form.Control.Feedback>
                 </Form.Group>
 
-                <div className="d-grid">
-                  <Button type="submit" variant="primary">
-                    Submit
+                <div className="text-end">
+                  <Button type="submit" variant="primary" className="submit-btn">
+                    {loader && <Spinner size="sm" animation="border" />} Add User
                   </Button>
                 </div>
               </Form>
@@ -109,6 +223,7 @@ const AddUserPage: React.FC = () => {
           </Card>
         </Col>
       </Row>
+      <ToastContainer />
     </Container>
   );
 };

@@ -56,7 +56,6 @@ class FirebaseAuthBackend {
    */
   // Function to register a user with email and password
   registerUser = (email: any, password: any) => {
-    // Use Firebase Authentication service to create a new user
     return new Promise((resolve, reject) => {
       firebase
         .auth()
@@ -67,7 +66,7 @@ class FirebaseAuthBackend {
             resolve(firebase.auth().currentUser);
           },
           (error: any) => {
-            // On error, handle the error using a custom error handler and reject the promise
+            // On error, reject the promise with the actual error object
             reject(this._handleError(error));
           }
         );
@@ -375,9 +374,7 @@ class FirebaseAuthBackend {
   };
 
   _handleError(error: any) {
-    // var errorCode = error.code;
-    var errorMessage = error.message;
-    return errorMessage;
+    return error; // Return the full error object
   }
 }
 

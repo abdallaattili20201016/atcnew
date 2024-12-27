@@ -36,8 +36,8 @@ const Register = () => {
       className: "bg-success text-white",
       transition: Slide,
     });
-  const errornotify = () =>
-    toast("Error ! An error occurred.", {
+  const errornotify = (message: string) =>
+    toast(`Error! ${message}`, {
       position: "top-center",
       hideProgressBar: true,
       closeOnClick: false,
@@ -84,13 +84,38 @@ const Register = () => {
           validation.values.password
         );
 
-        if (response)
+        if (response) {
           await fireBaseBackend.addNewUserToFirestore(validation.values);
-
-        successnotify();
-        navigate("/login");
-      } catch (error) {
-        errornotify();
+          successnotify();
+          navigate("/login");
+        }
+      } catch (error: any) {
+        switch (error.code) {
+          case 'auth/email-already-in-use':
+            errornotify("This email is already in use.");
+            break;
+          case 'auth/invalid-email':
+            errornotify("Invalid email address.");
+            break;
+          case 'auth/weak-password':
+            errornotify("The password is too weak.");
+            break;
+          case 'auth/operation-not-allowed':
+            errornotify("Email/password accounts are not enabled.");
+            break;
+          case 'auth/too-many-requests':
+            errornotify("Too many requests. Please try again later.");
+            break;
+          case 'auth/network-request-failed':
+            errornotify("Network error. Please check your connection.");
+            break;
+          case 'auth/internal-error':
+            errornotify("An internal error occurred. Please try again.");
+            break;
+          default:
+            errornotify(error.message); // Display the actual error message
+            break;
+        }
       } finally {
         setLoader(false);
       }
