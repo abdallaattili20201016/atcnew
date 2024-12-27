@@ -7,11 +7,10 @@ import ForgotPassword from "../pages/Authentication/ForgotPassword";
 import Register from "../pages/Authentication/Register";
 import UserProfile from "../pages/Authentication/UserProfile";
 import TrainerCoursesList from "../pages/Trainer/TrainerCoursesList";
-import TrainerCoursesDetails from "../pages/Trainer/TrainerCoursesDetails";
 import Dashboard from "../pages/DashBoard/Index";
 import AboutUs from "../pages/AboutUs/Index";
 import TrainerReports from "../pages/Trainer/TrainerReports/Index";
-import AdminReports from "../pages/Admin/AdminReports/Index";
+import AdminReports from "../pages/SharedPages/reports";
 import AdminAnnouncementsTable from "../pages/SharedPages/Announcements/AnnouncementsTable";
 import CreateAnnouncement from "../pages/SharedPages/Announcements/NewAnnouncement";
 import Users from "../pages/Admin/Users";
@@ -37,10 +36,7 @@ const authProtectedRoutes: Array<RouteObject> = [
   { path: "/trainer-courses-list", component: <TrainerCoursesList /> },
   { path: "/users", component: <Users /> },
 
-  {
-    path: "/trainer-courses-details/:id",
-    component: <TrainerCoursesDetails />,
-  },
+
   { path: "/aboutus", component: <AboutUs /> },
   
   { path: "/tarinerreports", component: <TrainerReports /> },
