@@ -1,20 +1,30 @@
 import React, { useState } from "react";
-import { Button, Form, Container, Row, Col, Card, Spinner } from "react-bootstrap";
+import {
+  Card,
+  Col,
+  Container,
+  Row,
+  Form,
+  Button,
+  Spinner,
+  InputGroup,
+} from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { getFirebaseBackend } from "../../../helpers/firebase_helper";
-import "react-toastify/dist/ReactToastify.css";
 import { toast, Slide, ToastContainer } from "react-toastify";
-import "./AddUserPage.css"; // Custom CSS file for additional styling
+
+import "react-toastify/dist/ReactToastify.css";
 
 const AddUserPage: React.FC = () => {
   const navigate = useNavigate();
   const firebaseBackend = getFirebaseBackend();
   const [loader, setLoader] = useState<boolean>(false);
+  const [passwordShow, setPasswordShow] = useState<boolean>(false);
 
   const successnotify = () =>
-    toast("Your application was successfully sent", {
+    toast("User added successfully", {
       position: "top-center",
       hideProgressBar: true,
       closeOnClick: false,
@@ -55,7 +65,7 @@ const AddUserPage: React.FC = () => {
         .matches(/^[0-9]+$/, "Phone number must only contain numbers")
         .min(10, "Phone number must be at least 10 digits"),
       city: Yup.string().required("Please Enter City"),
-      role: Yup.string().required("Please select the role Register"),
+      role: Yup.string().required("Please select a role"),
     }),
     onSubmit: async (values: any) => {
       setLoader(true);
@@ -72,29 +82,17 @@ const AddUserPage: React.FC = () => {
         }
       } catch (error: any) {
         switch (error.code) {
-          case 'auth/email-already-in-use':
+          case "auth/email-already-in-use":
             errornotify("This email is already in use.");
             break;
-          case 'auth/invalid-email':
+          case "auth/invalid-email":
             errornotify("Invalid email address.");
             break;
-          case 'auth/weak-password':
+          case "auth/weak-password":
             errornotify("The password is too weak.");
             break;
-          case 'auth/operation-not-allowed':
-            errornotify("Email/password accounts are not enabled.");
-            break;
-          case 'auth/too-many-requests':
-            errornotify("Too many requests. Please try again later.");
-            break;
-          case 'auth/network-request-failed':
-            errornotify("Network error. Please check your connection.");
-            break;
-          case 'auth/internal-error':
-            errornotify("An internal error occurred. Please try again.");
-            break;
           default:
-            errornotify(error.message); // Display the actual error message
+            errornotify(error.message);
             break;
         }
       } finally {
@@ -104,127 +102,197 @@ const AddUserPage: React.FC = () => {
   });
 
   return (
-    <Container className="d-flex align-items-center justify-content-center add-user-container">
-      <Row className="w-100 justify-content-center">
-        <Col md={6}>
-          <Card className="shadow-lg border-0 add-user-card">
-            <Card.Header className="text-center add-user-card-header">
-              <h4 className="mb-0">Add User</h4>
-            </Card.Header>
-            <Card.Body>
-              <Form onSubmit={validation.handleSubmit}>
-                <Form.Group controlId="username" className="mb-3">
-                  <Form.Label>Name</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="username"
-                    placeholder="Enter name"
-                    value={validation.values.username}
-                    onChange={validation.handleChange}
-                    onBlur={validation.handleBlur}
-                    isInvalid={!!validation.errors.username}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {validation.errors.username}
-                  </Form.Control.Feedback>
-                </Form.Group>
+    <React.Fragment>
+      <div className="account-pages">
+        <Container>
+          <Row className="justify-content-center">
+            <Col md={11}>
+              <div className="auth-full-page-content d-flex min-vh-100 py-sm-5 py-4">
+                <div className="w-100">
+                  <div className="d-flex flex-column h-100 py-0 py-xl-4">
+                    <Card className="my-auto overflow-hidden">
+                      <Row className="g-0">
+                        <Col lg={12}>
+                          <div className="p-lg-5 p-4">
+                            <div className="text-center">
+                              <h5 className="mb-0">Add New User</h5>
+                            </div>
 
-                <Form.Group controlId="email" className="mb-3">
-                  <Form.Label>Email</Form.Label>
-                  <Form.Control
-                    type="email"
-                    name="email"
-                    placeholder="Enter email"
-                    value={validation.values.email}
-                    onChange={validation.handleChange}
-                    onBlur={validation.handleBlur}
-                    isInvalid={!!validation.errors.email}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {validation.errors.email}
-                  </Form.Control.Feedback>
-                </Form.Group>
+                            <div className="mt-4">
+                              <Form
+                                className="needs-validation"
+                                onSubmit={(e) => {
+                                  e.preventDefault();
+                                  validation.handleSubmit();
+                                  return false;
+                                }}
+                              >
+                                <Form.Group
+                                  className="mb-3"
+                                  controlId="username"
+                                >
+                                  <Form.Label>
+                                    Name <span className="text-danger">*</span>
+                                  </Form.Label>
+                                  <Form.Control
+                                    type="text"
+                                    placeholder="Enter name"
+                                    name="username"
+                                    onChange={validation.handleChange}
+                                    onBlur={validation.handleBlur}
+                                    value={validation.values.username || ""}
+                                    isInvalid={
+                                      validation.touched.username &&
+                                      !!validation.errors.username
+                                    }
+                                  />
+                                  <Form.Control.Feedback type="invalid">
+                                    {validation.errors.username}
+                                  </Form.Control.Feedback>
+                                </Form.Group>
 
-                <Form.Group controlId="password" className="mb-3">
-                  <Form.Label>Password</Form.Label>
-                  <Form.Control
-                    type="password"
-                    name="password"
-                    placeholder="Enter password"
-                    value={validation.values.password}
-                    onChange={validation.handleChange}
-                    onBlur={validation.handleBlur}
-                    isInvalid={!!validation.errors.password}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {validation.errors.password}
-                  </Form.Control.Feedback>
-                </Form.Group>
+                                <Form.Group
+                                  className="mb-3"
+                                  controlId="email"
+                                >
+                                  <Form.Label>
+                                    Email <span className="text-danger">*</span>
+                                  </Form.Label>
+                                  <Form.Control
+                                    type="email"
+                                    placeholder="Enter email"
+                                    name="email"
+                                    onChange={validation.handleChange}
+                                    onBlur={validation.handleBlur}
+                                    value={validation.values.email || ""}
+                                    isInvalid={
+                                      validation.touched.email &&
+                                      !!validation.errors.email
+                                    }
+                                  />
+                                  <Form.Control.Feedback type="invalid">
+                                    {validation.errors.email}
+                                  </Form.Control.Feedback>
+                                </Form.Group>
 
-                <Form.Group controlId="phone" className="mb-3">
-                  <Form.Label>Phone</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="phone"
-                    placeholder="Enter phone number"
-                    value={validation.values.phone}
-                    onChange={validation.handleChange}
-                    onBlur={validation.handleBlur}
-                    isInvalid={!!validation.errors.phone}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {validation.errors.phone}
-                  </Form.Control.Feedback>
-                </Form.Group>
+                                <Form.Group className="mb-3">
+                                  <Form.Label>Password</Form.Label>
+                                  <InputGroup className="position-relative auth-pass-inputgroup">
+                                    <Form.Control
+                                      onPaste={(e) => e.preventDefault()}
+                                      placeholder="Enter password"
+                                      type={!passwordShow ? "password" : "text"}
+                                      name="password"
+                                      onChange={validation.handleChange}
+                                      onBlur={validation.handleBlur}
+                                      value={validation.values.password || ""}
+                                      isInvalid={
+                                        validation.touched.password &&
+                                        !!validation.errors.password
+                                      }
+                                    />
+                                    <Button
+                                      variant="link"
+                                      className="position-absolute end-0 top-0 text-decoration-none text-muted password-addon"
+                                      onClick={() =>
+                                        setPasswordShow(!passwordShow)
+                                      }
+                                    >
+                                      <i className="ri-eye-fill align-middle"></i>
+                                    </Button>
+                                    <Form.Control.Feedback type="invalid">
+                                      {validation.errors.password}
+                                    </Form.Control.Feedback>
+                                  </InputGroup>
+                                </Form.Group>
 
-                <Form.Group controlId="city" className="mb-3">
-                  <Form.Label>City</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="city"
-                    placeholder="Enter city"
-                    value={validation.values.city}
-                    onChange={validation.handleChange}
-                    onBlur={validation.handleBlur}
-                    isInvalid={!!validation.errors.city}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {validation.errors.city}
-                  </Form.Control.Feedback>
-                </Form.Group>
+                                <Form.Group className="mb-3" controlId="phone">
+                                  <Form.Label>Phone</Form.Label>
+                                  <Form.Control
+                                    type="text"
+                                    placeholder="Enter phone number"
+                                    name="phone"
+                                    onChange={validation.handleChange}
+                                    onBlur={validation.handleBlur}
+                                    value={validation.values.phone || ""}
+                                    isInvalid={
+                                      validation.touched.phone &&
+                                      !!validation.errors.phone
+                                    }
+                                  />
+                                  <Form.Control.Feedback type="invalid">
+                                    {validation.errors.phone}
+                                  </Form.Control.Feedback>
+                                </Form.Group>
 
-                <Form.Group controlId="role" className="mb-3">
-                  <Form.Label>Role</Form.Label>
-                  <Form.Select
-                    name="role"
-                    value={validation.values.role}
-                    onChange={validation.handleChange}
-                    onBlur={validation.handleBlur}
-                    isInvalid={!!validation.errors.role}
-                  >
-                    <option value="">Select a role</option>
-                    <option value="admin">Admin</option>
-                    <option value="trainer">Trainer</option>
-                    <option value="trainee">Trainee</option>
-                    <option value="user">User</option>
-                  </Form.Select>
-                  <Form.Control.Feedback type="invalid">
-                    {validation.errors.role}
-                  </Form.Control.Feedback>
-                </Form.Group>
+                                <Form.Group className="mb-3" controlId="city">
+                                  <Form.Label>City</Form.Label>
+                                  <Form.Control
+                                    type="text"
+                                    placeholder="Enter city"
+                                    name="city"
+                                    onChange={validation.handleChange}
+                                    onBlur={validation.handleBlur}
+                                    value={validation.values.city || ""}
+                                    isInvalid={
+                                      validation.touched.city &&
+                                      !!validation.errors.city
+                                    }
+                                  />
+                                  <Form.Control.Feedback type="invalid">
+                                    {validation.errors.city}
+                                  </Form.Control.Feedback>
+                                </Form.Group>
 
-                <div className="text-end">
-                  <Button type="submit" variant="primary" className="submit-btn">
-                    {loader && <Spinner size="sm" animation="border" />} Add User
-                  </Button>
+                                <Form.Group className="mb-3" controlId="role">
+                                  <Form.Label>Role</Form.Label>
+                                  <Form.Select
+                                    name="role"
+                                    onChange={validation.handleChange}
+                                    onBlur={validation.handleBlur}
+                                    value={validation.values.role || ""}
+                                    isInvalid={
+                                      validation.touched.role &&
+                                      !!validation.errors.role
+                                    }
+                                  >
+                                    <option value="">Select a role</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="trainer">Trainer</option>
+                                    <option value="trainee">Trainee</option>
+                                    <option value="user">User</option>
+                                  </Form.Select>
+                                  <Form.Control.Feedback type="invalid">
+                                    {validation.errors.role}
+                                  </Form.Control.Feedback>
+                                </Form.Group>
+
+                                <div className="mt-2">
+                                  <Button
+                                    className="btn btn-primary w-100"
+                                    type="submit"
+                                  >
+                                    {loader && (
+                                      <Spinner size="sm" animation="border" />
+                                    )}{" "}
+                                    Add User
+                                  </Button>
+                                </div>
+                              </Form>
+                            </div>
+                          </div>
+                        </Col>
+                      </Row>
+                    </Card>
+                  </div>
                 </div>
-              </Form>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+              </div>
+            </Col>
+          </Row>
+        </Container>
+      </div>
       <ToastContainer />
-    </Container>
+    </React.Fragment>
   );
 };
 
