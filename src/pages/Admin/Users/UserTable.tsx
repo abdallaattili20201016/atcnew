@@ -169,19 +169,20 @@ const UserTable = ({ isShow, hideUserModal }: userProps) => {
             case 1:
               return (
                 <span className="badge bg-success-subtle text-success p-2">
-                  Admin
-                </span>
-              );
-            case 2:
-              return (
-                <span className="badge bg-info-subtle text-primary p-2">
-                  {cell.row.original.role}
+                  Active
                 </span>
               );
             default:
               return null; // Return null if the status is not recognized
           }
         },
+      },
+      {
+        Header: "ROLE",
+        accessor: "role",
+        Filter: false,
+        isSortable: true,
+        Cell: (cell: any) => <>{cell.row.original.role}</>,
       },
       {
         Header: "ACTION",
@@ -418,7 +419,7 @@ const UserTable = ({ isShow, hideUserModal }: userProps) => {
                     >
                       <option value="" disabled>Select Status</option>
                       <option value="0">Pending</option>
-                      <option value="1">Admin</option>
+                      <option value="1">Active</option>
                       <option value="2">User</option>
                       <option value="-1">Rejected</option>
                     </Form.Select>
