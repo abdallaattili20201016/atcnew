@@ -21,7 +21,7 @@ const InboxItem: React.FC<InboxItemProps> = ({ message, onSelect }) => {
           const docRef = doc(db, 'users', message.senderId);
           const docSnap = await getDoc(docRef);
           if (docSnap.exists()) {
-            setSenderName(docSnap.data().name || 'Unknown'); // Adjust the field name if necessary
+            setSenderName(docSnap.data().username || 'Unknown'); // Adjust the field name if necessary
           }
         } catch (error) {
           console.error('Error fetching sender name:', error);

@@ -59,13 +59,12 @@ const NewAnnouncement = () => {
     <React.Fragment>
       <div className="page-content">
         <Container fluid>
-
+        <h2 className="my-4">Creat New Announcement</h2>
 
           <Row className="justify-content-center">
             <Col xxl={9}>
               <Card>
                 <Card.Body>
-                  <h4 className="card-title mb-4">Create New Announcement</h4>
                   <Form onSubmit={formik.handleSubmit}>
                     <Row className="mb-3">
                       <Col md={12}>

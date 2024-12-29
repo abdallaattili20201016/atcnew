@@ -100,6 +100,14 @@ const TrainerNavdata = () => {
       icon: "las la-house-damage",
       link: "/adminreports",
     },
+
+    {
+      id: "messages",
+      label: "Messages",
+      icon: "las la-envelope",
+      link: "/messages",
+    },
+
     {
       label: "More",
       isHeader: true,
@@ -137,6 +145,13 @@ const TraineeNavdata = () => {
       label: "Courses",
       icon: "las la-house-damage",
       link: "/trainer-courses-list",
+    },
+
+    {
+      id: "messages",
+      label: "Messages",
+      icon: "las la-envelope",
+      link: "/messages",
     },
 
     {
