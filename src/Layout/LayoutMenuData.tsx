@@ -64,6 +64,7 @@ const AdminNavdata = () => {
   ];
   return <React.Fragment>{menuItems}</React.Fragment>;
 };
+
 const TrainerNavdata = () => {
   const menuItems: any = [
     {
@@ -113,6 +114,7 @@ const TrainerNavdata = () => {
   ];
   return <React.Fragment>{menuItems}</React.Fragment>;
 };
+
 const TraineeNavdata = () => {
   const menuItems: any = [
     {

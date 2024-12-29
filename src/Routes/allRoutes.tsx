@@ -67,10 +67,7 @@ const authProtectedRoutes: Array<RouteObject> = [
 
   { path: "/payment", component: <Payment /> },
   
-
-  
-
-
+  // ...other routes...
 ];
 
 const publicRoutes: Array<RouteObject> = [

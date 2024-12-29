@@ -415,21 +415,13 @@ export const fetchMessagesForUser = async (userId: string): Promise<Message[]> =
 
   const snapshot = await getDocs(q);
 
-  // Fetch user names if not included in the Messages collection
-  const usersSnapshot = await getDocs(collection(db, "users")); // Changed "Users" to "users"
-  const usersMap = new Map();
-  usersSnapshot.forEach((doc) => {
-    const data = doc.data();
-    usersMap.set(doc.id, data.name); // Assuming the user name is stored as 'name'
-  });
-
+  // Instead, return messages without senderName and recipientName
   return snapshot.docs.map((doc) => {
     const data = doc.data();
     return {
       id: doc.id,
       ...data,
-      senderName: usersMap.get(data.senderId) || "Unknown",
-      recipientName: usersMap.get(data.recipientId) || "Unknown",
+      // Remove senderName and recipientName
     } as Message;
   });
 };
@@ -543,7 +535,7 @@ export const fetchUserNameById = async (userId: string): Promise<string> => {
   try {
     const userDoc = await getDoc(doc(db, "users", userId));
     if (userDoc.exists()) {
-      return userDoc.data().name || "Unknown";
+      return userDoc.data().name || "Unknown"; // Adjust the field name if necessary
     } else {
       console.warn(`No user found with ID: ${userId}`);
       return "Unknown";

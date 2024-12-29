@@ -11,7 +11,7 @@ const MessagesPage: React.FC<{ userId: string }> = ({ userId }) => {
   };
 
   return (
-    <div className="d-flex flex-column flex-md-row mt-5">
+    <div className="d-flex flex-row" style={{ paddingTop: "70px", height: "100vh" }}> {/* Increased top padding */}
       {/* Sidebar */}
       <ChatSidebar userId={userId} onSelectUser={handleUserSelect} />
 
@@ -20,7 +20,7 @@ const MessagesPage: React.FC<{ userId: string }> = ({ userId }) => {
         <ChatWindow userId={userId} recipientId={selectedUserId} />
       ) : (
         <div className="d-flex justify-content-center align-items-center flex-grow-1">
-          <p className="text-center mt-5">Select a user to start chatting.</p>
+          <p>Select a user to start chatting.</p>
         </div>
       )}
     </div>

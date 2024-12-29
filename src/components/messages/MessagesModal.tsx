@@ -58,49 +58,47 @@ const MessagesModal: React.FC<MessagesModalProps> = ({ userId }) => {
               <h5 className="modal-title" id="messagesModalLabel">Messages</h5>
               <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div className="modal-body">
-              <div className="row">
-                <div className="col-md-4">
-                  <h6>Inbox</h6>
-                  <ul className="list-group">
-                    {messages.map((msg) => (
-                      <InboxItem
-                        key={msg.id}
-                        message={{
-                          senderName: msg.senderName || "Unknown", // Ensure senderName is a string
-                          content: msg.content,
-                          timestamp: typeof msg.timestamp === "string" ? msg.timestamp : msg.timestamp.toDate().toISOString(),
-                        }}
-                        onSelect={() => handleSelectMessage(msg)}
-                      />
-                    ))}
-                  </ul>
-                </div>
-                <div className="col-md-8">
-                  {selectedMessage && (
-                    <div>
-                      <h6>Message Details</h6>
-                      <p>
-                        <strong>From:</strong> {selectedMessage.senderName || "Unknown"}
-                      </p>
-                      <p>
-                        <strong>Message:</strong> {selectedMessage.content}
-                      </p>
-                      <p>
-                        <strong>Timestamp:</strong>{" "}
-                        {new Date(
-                          typeof selectedMessage.timestamp === "string"
-                            ? selectedMessage.timestamp
-                            : selectedMessage.timestamp.toDate()
-                        ).toLocaleString()}
-                      </p>
-                    </div>
-                  )}
-                </div>
+            <div className="modal-body d-flex">
+              <div className="w-50 me-3">
+                <h6>Inbox</h6>
+                <ul className="list-group">
+                  {messages.map((msg) => (
+                    <InboxItem
+                      key={msg.id}
+                      message={{
+                        senderId: msg.senderId,
+                        content: msg.content,
+                        timestamp: typeof msg.timestamp === "string" ? msg.timestamp : msg.timestamp.toDate().toISOString(),
+                      }}
+                      onSelect={() => handleSelectMessage(msg)}
+                    />
+                  ))}
+                </ul>
+              </div>
+              <div className="w-50">
+                {selectedMessage && (
+                  <div>
+                    <h6>Message Details</h6>
+                    <p>
+                      <strong>From:</strong> {selectedMessage.senderName || "Unknown"}
+                    </p>
+                    <p>
+                      <strong>Message:</strong> {selectedMessage.content}
+                    </p>
+                    <p>
+                      <strong>Timestamp:</strong>{" "}
+                      {new Date(
+                        typeof selectedMessage.timestamp === "string"
+                          ? selectedMessage.timestamp
+                          : selectedMessage.timestamp.toDate()
+                      ).toLocaleString()}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
             <div className="modal-footer">
-              <button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#composeModal">Compose</button>
+              <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
           </div>
         </div>

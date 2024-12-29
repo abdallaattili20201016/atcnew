@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fetchChatHistory, sendMessage, fetchUserNameById } from "../../helpers/firebase_helper";
+import { fetchChatHistory, sendMessage } from "../../helpers/firebase_helper";
 import { Timestamp } from "firebase/firestore";
 import MessageItem from "./MessageItem";
 
@@ -60,21 +60,20 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ userId, recipientId }) => {
   };
 
   return (
-    <div className="chat-window d-flex flex-column flex-grow-1 mt-6" style={{ height: "calc(100vh - 120px)", marginTop: "60px" }}>
+    <div className="d-flex flex-column flex-grow-1" style={{ height: "calc(100vh - 70px)" }}> {/* Adjusted height */}
       <div className="chat-header border-bottom p-3 bg-light d-flex align-items-center">
-        <div className="avatar bg-secondary text-white rounded-circle me-3" style={{ width: "40px", height: "40px" }}>
+        <div className="avatar bg-secondary text-white rounded-circle me-3 d-flex justify-content-center align-items-center" style={{ width: "40px", height: "40px" }}>
           {recipientId?.[0]?.toUpperCase() || "U"}
         </div>
         <h5 className="mb-0">{messages[0]?.recipientName || "You"}</h5>
         <button className="btn btn-outline-secondary ms-auto">Details</button>
       </div>
-      <div className="d-flex flex-column p-3 chat-messages" style={{ backgroundColor: "#f8f9fa", height: "400px", overflowY: "scroll", padding: "20px" }}>
+      <div className="d-flex flex-column p-3 chat-messages overflow-auto flex-grow-1">
         {messages.map((msg, index) => (
           <MessageItem
             key={index}
             message={{ 
               senderId: msg.senderId,
-              senderName: msg.senderName || "Unknown",
               content: msg.content, 
               timestamp: formatTimestamp(msg.timestamp) 
             }}
@@ -82,7 +81,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ userId, recipientId }) => {
           />
         ))}
       </div>
-      <div className="chat-input p-3 border-top bg-white">
+      <div className="chat-input p-3 border-top bg-white mb-3">
         <textarea
           className="form-control"
           rows={2}
