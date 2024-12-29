@@ -3,6 +3,7 @@ import { Table, Card, Button, Container, Row, Col, Form } from "react-bootstrap"
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../App"; // Adjust path to your Firebase setup
 import { getAuth } from "firebase/auth"; // Import Firebase Auth for the user info
+import moment from "moment";
 
 const ReportsPage = () => {
   const [reports, setReports] = useState<any[]>([]);
@@ -26,11 +27,11 @@ const ReportsPage = () => {
       let querySnapshot;
   
       if (reportType === "trainers") {
-        const trainersQuery = query(collection(db, "Users"), where("role", "==", "trainer"));
+        const trainersQuery = query(collection(db, "users"), where("role", "==", "trainer"));
         querySnapshot = await getDocs(trainersQuery);
         setReports(
           querySnapshot.docs.map((doc) => ({
-            name: doc.data().displayName || "Unknown",
+            username: doc.data().username || "Unknown",
             dateJoined: doc.data().dateJoined || "N/A",
             currentCourses: doc.data().currentCourses?.length || 0,
             completedCourses: doc.data().completedCourses?.length || 0,
@@ -38,11 +39,11 @@ const ReportsPage = () => {
           }))
         );
       } else if (reportType === "trainees") {
-        const traineesQuery = query(collection(db, "Users"), where("role", "==", "trainee"));
+        const traineesQuery = query(collection(db, "users"), where("role", "==", "trainee"));
         querySnapshot = await getDocs(traineesQuery);
         setReports(
           querySnapshot.docs.map((doc) => ({
-            name: doc.data().displayName || "Unknown",
+            username: doc.data().username || "Unknown",
             dateJoined: doc.data().dateJoined || "N/A",
             enrolledCourses: doc.data().enrolledCourses?.length || 0,
             completedCourses: doc.data().completedCourses?.length || 0,
@@ -106,8 +107,10 @@ const ReportsPage = () => {
             {reports.length > 0 ? (
               reports.map((report, index) => (
                 <tr key={index}>
-                  <td>{report.name}</td>
-                  <td>{report.dateJoined}</td>
+                  <td>{report.username}</td>
+                  <td>{ moment(report.createdDtm).format(
+                                                        "MMMM Do YYYY, h:mm a"
+                                                      )}</td>
                   <td>{report.currentCourses}</td>
                   <td>{report.completedCourses}</td>
                   <td>{report.rating}</td>
