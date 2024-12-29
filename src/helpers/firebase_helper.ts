@@ -4,9 +4,10 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import "firebase/compat/firestore";
 import "firebase/compat/storage";
-import { getFirestore, doc, getDoc, deleteDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc, deleteDoc, collection, addDoc, query, where, getDocs, orderBy, limit, Timestamp, serverTimestamp } from "firebase/firestore";
 import { toast } from "react-toastify";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db } from "./config";
 
 class FirebaseAuthBackend {
   firestore: firebase.firestore.Firestore;
@@ -394,6 +395,164 @@ class FirebaseAuthBackend {
     return error; // Return the full error object
   }
 }
+
+interface Message {
+  id: string;
+  senderId: string;
+  recipientId: string;
+  content: string;
+  senderName?: string; // Optional
+  recipientName?: string; // Optional
+  timestamp: Timestamp | string; // Can be a Firestore Timestamp or an ISO string
+}
+
+export const fetchMessagesForUser = async (userId: string): Promise<Message[]> => {
+  const q = query(
+    collection(db, "Messages"),
+    where("senderId", "==", userId),
+    orderBy("timestamp", "desc")
+  );
+
+  const snapshot = await getDocs(q);
+
+  // Fetch user names if not included in the Messages collection
+  const usersSnapshot = await getDocs(collection(db, "users")); // Changed "Users" to "users"
+  const usersMap = new Map();
+  usersSnapshot.forEach((doc) => {
+    const data = doc.data();
+    usersMap.set(doc.id, data.name); // Assuming the user name is stored as 'name'
+  });
+
+  return snapshot.docs.map((doc) => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      ...data,
+      senderName: usersMap.get(data.senderId) || "Unknown",
+      recipientName: usersMap.get(data.recipientId) || "Unknown",
+    } as Message;
+  });
+};
+
+// Remove the hardcoded senderName and use serverTimestamp for consistent timestamp handling
+export const sendMessage = async (senderId: string, recipientId: string, content: string) => {
+  const newMessage = {
+    senderId,
+    recipientId,
+    content,
+    timestamp: serverTimestamp(), // Use Firestore server timestamp
+    // Remove senderName here
+  };
+  await addDoc(collection(db, "Messages"), newMessage);
+};
+
+export const fetchRecentChats = async (userId: string): Promise<Message[]> => {
+  try {
+    // Query only messages where the user is the recipient
+    const q = query(
+      collection(db, "Messages"),
+      where("recipientId", "==", userId),
+      orderBy("timestamp", "desc"),
+      limit(5)
+    );
+
+    const snapshot = await getDocs(q);
+    const results = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Message[];
+
+    // Sort by timestamp safely
+    results.sort((a, b) => {
+      const aTime = a.timestamp instanceof Timestamp
+        ? a.timestamp.toDate()
+        : new Date(a.timestamp as any);
+      const bTime = b.timestamp instanceof Timestamp
+        ? b.timestamp.toDate()
+        : new Date(b.timestamp as any);
+      return bTime.getTime() - aTime.getTime();
+    });
+
+    // Fetch all users to map IDs to names
+    const allUsers = await fetchAllUsers();
+    const userMap = Object.fromEntries(allUsers.map(u => [u.id, u.name || "Unknown"]));
+
+    // Assign senderName using userMap
+    results.forEach((msg) => {
+      msg.senderName = userMap[msg.senderId] || "Unknown";
+      // Assign recipientName as "You" if recipientId matches userId
+      msg.recipientName = msg.recipientId === userId ? "You" : (userMap[msg.recipientId] || "Unknown");
+    });
+
+    console.log("Fetched Recent Chats (recipient only):", results);
+    return results;
+  } catch (error) {
+    console.error("Error fetching recent chats:", error);
+    throw error;
+  }
+};
+
+export const fetchChatHistory = async (userId: string, recipientId: string): Promise<Message[]> => {
+  try {
+    const q = query(
+      collection(db, 'Messages'),
+      where('senderId', 'in', [userId, recipientId]),
+      where('recipientId', 'in', [userId, recipientId]),
+      orderBy('timestamp', 'asc')
+    );
+
+    const snapshot = await getDocs(q);
+    console.log("Fetched Chat History:", snapshot.docs.map(doc => doc.data())); // Debugging Log
+
+    // Fetch all users to map IDs to names
+    const allUsers = await fetchAllUsers();
+    const userMap = Object.fromEntries(allUsers.map(u => [u.id, u.name || "Unknown"]));
+
+    return snapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        senderId: data.senderId,
+        senderName: userMap[data.senderId] || "Unknown",
+        recipientId: data.recipientId,
+        content: data.content,
+        timestamp: data.timestamp,
+      };
+    });
+  } catch (error) {
+    console.error('Error fetching chat history:', error);
+    throw new Error('Failed to fetch chat history');
+  }
+};
+
+export const fetchAllUsers = async () => {
+  const q = query(collection(db, "users"));
+  const snapshot = await getDocs(q);
+  console.log("Fetched All Users:", snapshot.docs.map(doc => doc.data()));
+  return snapshot.docs.map((doc) => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      name: data.name || "Unknown",
+      ...data,
+    };
+  });
+};
+
+export const fetchUserNameById = async (userId: string): Promise<string> => {
+  try {
+    const userDoc = await getDoc(doc(db, "users", userId));
+    if (userDoc.exists()) {
+      return userDoc.data().name || "Unknown";
+    } else {
+      console.warn(`No user found with ID: ${userId}`);
+      return "Unknown";
+    }
+  } catch (error) {
+    console.error("Error fetching user name:", error);
+    return "Unknown";
+  }
+};
 
 let _fireBaseBackend: any = null;
 

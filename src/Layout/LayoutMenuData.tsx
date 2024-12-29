@@ -43,6 +43,12 @@ const AdminNavdata = () => {
       icon: "las la-house-damage",
       link: "/admin-courses",
     },
+    {
+      id: "messages",
+      label: "Messages",
+      icon: "las la-envelope",
+      link: "/messages",
+    },
 
     {
       label: "More",

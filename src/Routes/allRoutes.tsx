@@ -19,8 +19,12 @@ import AddCourse from "../pages/Admin/AdminCourses/AddCourse";
 import CourseDetails from "../pages/SharedPages/CourseDetails";
 import AddUserPage from "../pages/Admin/Users/AddUserPage";
 import Payment from "../pages/Trainee/Payment";
+import MessagesPage from "../components/messages/MessagesPage";
+import MessagesPageWithAuth from "../components/messages/MessagesPageWithAuth";
+import { getAuth } from "firebase/auth";
 
 
+const auth = getAuth(); // Get the authenticated user
 
 interface RouteObject {
   path: string;
@@ -29,6 +33,7 @@ interface RouteObject {
 }
 
 const authProtectedRoutes: Array<RouteObject> = [
+  
   // Dashboard
   { path: "/index", component: <Dashboard /> },
   { path: "/dashboard", component: <Dashboard /> },
@@ -56,6 +61,7 @@ const authProtectedRoutes: Array<RouteObject> = [
   { path: "/admin-courses", component: <AdminCourses /> },
   { path: "/admin-courses/add", component: <AddCourse /> },
 
+  { path: "/messages", component: <MessagesPageWithAuth /> },
 
   { path: "/courses/:id", component: <CourseDetails /> },
 
