@@ -24,10 +24,13 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ userId, onSelectUser }) => {
         });
 
         // Assign senderName using userMap
-        const chatsWithNames = chats.map(chat => ({
-          ...chat,
-          senderName: userMap[chat.senderId] || "Unknown",
-        }));
+        const chatsWithNames = chats.map((chat) => {
+          const otherUserId = chat.senderId === userId ? chat.recipientId : chat.senderId;
+          return {
+            ...chat,
+            senderName: userMap[otherUserId] || "Unknown",
+          };
+        });
         setRecentChats(chatsWithNames);
 
         // Set allUsers excluding the current user
