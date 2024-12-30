@@ -9,19 +9,21 @@ import UserProfile from "../pages/Authentication/UserProfile";
 import TrainerCoursesList from "../pages/Trainer/TrainerCoursesList";
 import Dashboard from "../pages/DashBoard/Index";
 import AboutUs from "../pages/AboutUs/Index";
-import TrainerReports from "../pages/Trainer/TrainerReports/Index";
 import AdminReports from "../pages/SharedPages/reports";
 import AdminAnnouncementsTable from "../pages/SharedPages/Announcements/AnnouncementsTable";
 import CreateAnnouncement from "../pages/SharedPages/Announcements/NewAnnouncement";
 import Users from "../pages/Admin/Users";
-import AdminCourses from "../pages/Admin/AdminCourses/AdminCourses";
-import AddCourse from "../pages/Admin/AdminCourses/AddCourse";
 import CourseDetails from "../pages/SharedPages/CourseDetails";
 import AddUserPage from "../pages/Admin/Users/AddUserPage";
 import Payment from "../pages/Trainee/Payment";
 import MessagesPage from "../components/messages/MessagesPage";
 import MessagesPageWithAuth from "../components/messages/MessagesPageWithAuth";
 import { getAuth } from "firebase/auth";
+import AllCourses from "../pages/Trainee/AllCourses";
+import TraineeCoursesList from "../pages/Trainee/TraineeCoursesList";
+import TraineeCoursesDetails from "../pages/Trainee/TraineeCoursesDetails";
+import AssignmentSubmitList from "../pages/Trainer/AssignmentSubmitList";
+import TrainerCoursesDetails from "../pages/Trainer/TrainerCoursesDetails";
 
 
 const auth = getAuth(); // Get the authenticated user
@@ -40,13 +42,12 @@ const authProtectedRoutes: Array<RouteObject> = [
   { path: "/", exact: true, component: <Navigate to="/login" /> },
   { path: "*", component: <Navigate to="/login" /> },
 
-  { path: "/trainer-courses-list", component: <TrainerCoursesList /> },
+
   { path: "/users", component: <Users /> },
 
 
   { path: "/aboutus", component: <AboutUs /> },
   
-  { path: "/tarinerreports", component: <TrainerReports /> },
 
   //  Profile
   { path: "/user-profile", component: <UserProfile /> },
@@ -58,14 +59,35 @@ const authProtectedRoutes: Array<RouteObject> = [
   { path: "/announcements-table", component: <AdminAnnouncementsTable /> },
   { path: "/admin-announcements/new", component: <CreateAnnouncement /> },
 
-  { path: "/admin-courses", component: <AdminCourses /> },
-  { path: "/admin-courses/add", component: <AddCourse /> },
 
   { path: "/messages", component: <MessagesPageWithAuth /> },
 
   { path: "/courses/:id", component: <CourseDetails /> },
 
   { path: "/payment", component: <Payment /> },
+
+
+  { path: "/trainer-courses-list", component: <TrainerCoursesList /> },
+  {
+    path: "/trainer-courses-details/:id",
+    component: <TrainerCoursesDetails />,
+  },
+
+
+  {
+    path: "/all-courses",
+    component: <AllCourses />,
+  },
+
+  { path: "/trainee-courses-list", component: <TraineeCoursesList /> },
+  {
+    path: "/trainee-courses-details/:id",
+    component: <TraineeCoursesDetails />,
+  },
+  {
+    path: "/assignment-submit-list",
+    component: <AssignmentSubmitList />,
+},
   
   // ...other routes...
 ];

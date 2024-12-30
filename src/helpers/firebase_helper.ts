@@ -287,6 +287,149 @@ class FirebaseAuthBackend {
 
   //attili
 
+  
+
+///////////////////////////////////////////
+  getAllReports = async (): Promise<any> => {
+    try {
+      const querySnapshot = await this.firestore.collection("reports").get();
+  
+      if (!querySnapshot.empty) {
+        return querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+      } else {
+        console.log("No reports found.");
+        return [];
+      }
+    } catch (error) {
+      console.error("Error fetching reports:", error);
+      throw error;
+    }
+  };
+  ///////////////////////////////////////////
+  
+  /**
+   * Deletes a user from Firestore.
+   */
+  deleteUser = async (userId: string) => {
+    try {
+      console.log(`Attempting to delete user with ID: ${userId}`);
+      const userDoc = this.firestore.collection("users").doc(userId);
+      await userDoc.delete();
+      console.log(`User with ID: ${userId} deleted successfully`);
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      throw error;
+    }
+  };
+
+  //end attili
+
+  getAllCourses = async (searchKey?: string): Promise<any> => {
+    try {
+      // Get reference to the "courses" collection
+      let query;
+
+      // Add search functionality for title or description
+      if (searchKey) {
+        query = this.firestore
+          .collection("courses")
+          .where("title", ">=", searchKey)
+          .where("title", "<=", searchKey + "\uf8ff");
+      } else {
+        query = this.firestore.collection("courses");
+      }
+
+      // Fetch all matching courses
+      const querySnapshot = await query.get();
+
+      if (!querySnapshot.empty) {
+        const currentUserId = this.uuid; // Assuming `uuid` is your user ID
+        const currentDate = new Date();
+
+        return querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+          const isExpired = data?.to && data.to.toDate() < currentDate;
+
+          // Check if the current user ID exists in the "students" array
+          const isEnrolled =
+            Array.isArray(data.students) &&
+            data.students.includes(currentUserId);
+
+          return {
+            id: doc.id,
+            ...data,
+            isExp: isExpired,
+            isEnrolled: isEnrolled,
+          };
+        });
+      } else {
+        console.log("No courses found matching the criteria.");
+        return [];
+      }
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+      throw error;
+    }
+  };
+  async handleEnrollCourse(courseId: string): Promise<void> {
+    try {
+      const courseRef = this.firestore.collection("courses").doc(courseId);
+
+      // Get the course document
+      const courseDoc = await courseRef.get();
+      if (!courseDoc.exists) {
+        throw new Error("Course not found");
+      }
+
+      const courseData = courseDoc.data();
+      const students = courseData?.students || [];
+
+      // Check if the user is already enrolled
+      const isEnrolled = students.includes(this.uuid);
+
+      // Update the students array: add or remove the user
+      const updatedStudents = isEnrolled
+        ? students.filter((id: string) => id !== this.uuid) // Remove the user
+        : [...students, this.uuid]; // Add the user
+
+      await courseRef.update({ students: updatedStudents });
+    } catch (error) {
+      console.error("Error handling course enrollment:", error);
+      throw error;
+    }
+  }
+
+  async getTraineeCourses(): Promise<any[]> {
+    try {
+      const coursesRef = this.firestore.collection("courses");
+
+      // Query courses where `students` array contains `this.uuid`
+      const querySnapshot = await coursesRef
+        .where("students", "array-contains", this.uuid)
+        .get();
+
+      if (querySnapshot.empty) {
+        console.log("No courses found for this user.");
+        return [];
+      }
+
+      // Map the results to an array of course data
+      const courses = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      console.log("Courses for user:", courses);
+      return courses;
+    } catch (error) {
+      console.error("Error fetching courses for student:", error);
+      throw error;
+    }
+  }
+
   getTrainerCourses = async (id?: string, searchKey?: string): Promise<any> => {
     try {
       if (id) {
@@ -348,43 +491,353 @@ class FirebaseAuthBackend {
     }
   };
 
-///////////////////////////////////////////
-  getAllReports = async (): Promise<any> => {
+  async addEditAssignment(assignment: any, file?: File): Promise<any> {
     try {
-      const querySnapshot = await this.firestore.collection("reports").get();
-  
-      if (!querySnapshot.empty) {
-        return querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+      const courseRef = this.firestore
+        .collection("courses")
+        .doc(assignment.course_id);
+
+      // Check if the course exists
+      const courseSnapshot = await courseRef.get();
+      if (!courseSnapshot.exists) {
+        throw new Error("Course not found");
+      }
+
+      let fileUrl;
+
+      // If a new file is provided, upload it and get the file URL
+      if (file) {
+        fileUrl = await this.uploadFileToStorage(file, "assignments");
+      }
+
+      // Prepare the new assignment data
+      const newAssignment = {
+        title: assignment.title,
+        mark: assignment.mark,
+        start: assignment.start,
+        end: assignment.end,
+        submits: assignment.submits,
+        ...(fileUrl ? { fileUrl } : {}),
+      };
+
+      if (assignment.assignment_id != null) {
+        // Edit mode: Update an existing assignment in the array
+        const courseData = courseSnapshot.data();
+        const assignments = courseData?.assignments || [];
+
+        // Find the assignment by id and update it
+        const assignmentIndex = assignments.findIndex(
+          (a: any, i: any) => i === assignment.assignment_id
+        );
+        if (assignmentIndex !== -1) {
+          // Update the specific assignment
+          assignments[assignmentIndex] = {
+            ...assignments[assignmentIndex],
+            ...newAssignment,
+          };
+        } else {
+          throw new Error("Assignment not found");
+        }
+
+        // Update the course document with the modified assignments array
+        await courseRef.update({
+          assignments: assignments,
+          updatedDtm: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+
+        console.log("Assignment updated successfully");
+        return newAssignment;
       } else {
-        console.log("No reports found.");
-        return [];
+        // Add mode: Add a new assignment to the array
+        const courseData = courseSnapshot.data();
+        const assignments = courseData?.assignments || [];
+
+        // Assign a new ID (could be auto-generated or based on index or another field)
+        const newAssignmentData = newAssignment;
+
+        // Add the new assignment to the array
+        assignments.push(newAssignmentData);
+
+        // Update the course document with the new assignments array
+        await courseRef.update({
+          assignments: assignments,
+        });
+
+        console.log("Assignment added successfully");
+        return newAssignmentData;
       }
     } catch (error) {
-      console.error("Error fetching reports:", error);
+      console.error("Error in addEditAssignment:", error);
       throw error;
     }
-  };
-  ///////////////////////////////////////////
-  
-  /**
-   * Deletes a user from Firestore.
-   */
-  deleteUser = async (userId: string) => {
-    try {
-      console.log(`Attempting to delete user with ID: ${userId}`);
-      const userDoc = this.firestore.collection("users").doc(userId);
-      await userDoc.delete();
-      console.log(`User with ID: ${userId} deleted successfully`);
-    } catch (error) {
-      console.error("Error deleting user:", error);
-      throw error;
-    }
-  };
+  }
 
-  //end attili
+  async deleteAssignment(course_id: any, assignment_id: any): Promise<any> {
+    try {
+      const courseRef = this.firestore.collection("courses").doc(course_id);
+
+      // Check if the course exists
+      const courseSnapshot = await courseRef.get();
+      if (!courseSnapshot.exists) {
+        throw new Error("Course not found");
+      }
+      if (assignment_id != null) {
+        // Edit mode: Update an existing assignment in the array
+        const courseData = courseSnapshot.data();
+        const assignments = courseData?.assignments || [];
+
+        // Find the assignment by id and remove it
+        const assignmentIndex = assignments.findIndex(
+          (a: any, i: any) => i === assignment_id
+        );
+        console.log("assignmentIndex :>> ", assignmentIndex);
+        if (assignmentIndex !== -1) {
+          // Remove the assignment from the array
+          assignments.splice(assignmentIndex, 1);
+
+          // Update the course document with the modified assignments array
+          await courseRef.update({
+            assignments: assignments,
+            updatedDtm: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+
+          console.log("Assignment deleted successfully");
+        } else {
+          throw new Error("Assignment not found");
+        }
+      } else {
+        throw new Error("Invalid assignment ID");
+      }
+    } catch (error) {
+      console.error("Error in deleteAssignment:", error);
+      throw error;
+    }
+  }
+
+  async addEditDocument(data: any, file?: File): Promise<any> {
+    try {
+      const courseRef = this.firestore
+        .collection("courses")
+        .doc(data.course_id);
+
+      const courseSnapshot = await courseRef.get();
+      if (!courseSnapshot.exists) {
+        throw new Error("Course not found");
+      }
+
+      let fileUrl;
+      const courseData = courseSnapshot.data();
+      const documents = courseData?.documents || [];
+
+      if (file) {
+        fileUrl = await this.uploadFileToStorage(file, "documents");
+      }
+
+      const newDocument = {
+        title: data.title,
+        ...(fileUrl ? { fileUrl } : {}),
+      };
+
+      if (data.document_id != null) {
+        const index = documents.findIndex(
+          (a: any, i: any) => i === data.document_id
+        );
+        if (index !== -1) {
+          documents[index] = {
+            ...documents[index],
+            ...newDocument,
+          };
+        } else {
+          throw new Error("Document not found");
+        }
+
+        await courseRef.update({
+          documents: documents,
+          updatedDtm: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+
+        return newDocument;
+      } else {
+        documents.push(newDocument);
+
+        await courseRef.update({
+          documents: documents,
+        });
+
+        return newDocument;
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async deleteDocuments(course_id: any, document_id: any): Promise<any> {
+    try {
+      const courseRef = this.firestore.collection("courses").doc(course_id);
+
+      const courseSnapshot = await courseRef.get();
+      if (!courseSnapshot.exists) {
+        throw new Error("Course not found");
+      }
+
+      if (document_id != null) {
+        const courseData = courseSnapshot.data();
+        const documents = courseData?.documents || [];
+
+        const index = documents.findIndex(
+          (a: any, i: any) => i === document_id
+        );
+
+        if (index !== -1) {
+          documents.splice(index, 1);
+
+          await courseRef.update({
+            documents: documents,
+            updatedDtm: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+        } else {
+          throw new Error("document not found");
+        }
+      } else {
+        throw new Error("Invalid document ID");
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async submitAssignment(
+    course_id: any,
+    assignment_id: any,
+    file: File
+  ): Promise<any> {
+    try {
+      const courseRef = this.firestore.collection("courses").doc(course_id);
+
+      const courseSnapshot = await courseRef.get();
+      if (!courseSnapshot.exists) {
+        throw new Error("Course not found");
+      }
+
+      let fileUrl;
+      const courseData = courseSnapshot.data();
+      const assignments = courseData?.assignments || [];
+
+      if (file) {
+        fileUrl = await this.uploadFileToStorage(file, "submitions");
+      }
+
+      const newObj = {
+        user_id: this.uuid,
+        mark: null,
+        fileUrl,
+      };
+
+      const index = assignments.findIndex(
+        (a: any, i: any) => i === assignment_id
+      );
+      if (index != -1)
+        assignments[index].submits = [...assignments[index].submits, newObj];
+
+      await courseRef.update({
+        assignments: assignments,
+        updatedDtm: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async deleteSubmission(course_id: any, assignment_id: number): Promise<any> {
+    try {
+      const courseRef = this.firestore.collection("courses").doc(course_id);
+
+      const courseSnapshot = await courseRef.get();
+      if (!courseSnapshot.exists) {
+        throw new Error("Course not found");
+      }
+
+      const courseData = courseSnapshot.data();
+      const assignments = courseData?.assignments || [];
+
+      if (assignments[assignment_id]) {
+        // Create a copy of the assignments array to modify
+        const updatedAssignments = [...assignments];
+
+        // Filter the submits array for the specified assignment
+        updatedAssignments[assignment_id].submits = updatedAssignments[
+          assignment_id
+        ].submits.filter((submission: any) => submission.user_id !== this.uuid);
+
+        // Update the entire assignments array
+        await courseRef.update({
+          assignments: updatedAssignments,
+          updatedDtm: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+      } else {
+        throw new Error("Assignment not found");
+      }
+    } catch (error) {
+      console.error("Error deleting submission:", error);
+      throw error;
+    }
+  }
+
+  async markAssignment(
+    course_id: any,
+    assignment_id: any,
+    user_id: any,
+    mark: number
+  ): Promise<any> {
+    try {
+      const courseRef = this.firestore.collection("courses").doc(course_id);
+
+      const courseSnapshot = await courseRef.get();
+      if (!courseSnapshot.exists) {
+        throw new Error("Course not found");
+      }
+
+      const courseData = courseSnapshot.data();
+      const assignments = courseData?.assignments || [];
+
+      // Find the assignment
+      const assignmentIndex = assignments.findIndex(
+        (a: any, i: any) => i === assignment_id
+      );
+      if (assignmentIndex === -1) {
+        throw new Error("Assignment not found");
+      }
+
+      const assignment = assignments[assignmentIndex];
+
+      // Find the submission by user_id
+      const submissionIndex = assignment.submits.findIndex(
+        (submission: any) => submission.user_id === user_id
+      );
+      if (submissionIndex === -1) {
+        throw new Error("Submission not found for the specified user");
+      }
+
+      // Update the mark
+      assignment.submits[submissionIndex].mark = mark;
+
+      // Update the course document in Firestore
+      await courseRef.update({
+        assignments: assignments,
+        updatedDtm: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+
+
+
+
+
+
+  //////////////// end 2 attili
 
   getAuthenticatedUser = () => {
     if (!sessionStorage.getItem("authUser")) return null;

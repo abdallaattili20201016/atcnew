@@ -84,7 +84,7 @@ const TrainerNavdata = () => {
 
     {
       id: "trainer-courses-list",
-      label: "Courses",
+      label: "My Courses",
       icon: "las la-house-damage",
       link: "/trainer-courses-list",
     },
@@ -141,10 +141,17 @@ const TraineeNavdata = () => {
     },
 
     {
-      id: "trainer-courses-list",
-      label: "Courses",
+      id: "all-courses",
+      label: "All Courses",
+      icon: "las la-th-list",
+      link: "/all-courses",
+    },
+
+    {
+      id: "trainee-courses-list",
+      label: "My Courses",
       icon: "las la-house-damage",
-      link: "/trainer-courses-list",
+      link: "/trainee-courses-list",
     },
 
     {

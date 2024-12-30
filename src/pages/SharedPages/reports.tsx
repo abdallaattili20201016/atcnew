@@ -13,6 +13,10 @@ const ReportsPage = () => {
   const auth = getAuth();
   const currentUser = JSON.parse(sessionStorage.getItem("user_details") || "{}");
 
+
+
+
+  
   const fetchReports = async (reportType: string) => {
     try {
       setIsLoading(true);
@@ -32,7 +36,7 @@ const ReportsPage = () => {
         setReports(
           querySnapshot.docs.map((doc) => ({
             username: doc.data().username || "Unknown",
-            dateJoined: doc.data().dateJoined || "N/A",
+            createdDtm: doc.data().createdDtm ? moment(doc.data().createdDtm.toDate()).format("MMMM Do YYYY") : "N/A",
             currentCourses: doc.data().currentCourses?.length || 0,
             completedCourses: doc.data().completedCourses?.length || 0,
             rating: doc.data().rating || "N/A",
@@ -44,7 +48,7 @@ const ReportsPage = () => {
         setReports(
           querySnapshot.docs.map((doc) => ({
             username: doc.data().username || "Unknown",
-            dateJoined: doc.data().dateJoined || "N/A",
+            createdDtm: doc.data().createdDtm ? moment(doc.data().createdDtm.toDate()).format("MMMM Do YYYY") : "N/A",
             enrolledCourses: doc.data().enrolledCourses?.length || 0,
             completedCourses: doc.data().completedCourses?.length || 0,
             averageGrade: doc.data().averageGrade || "N/A",
@@ -108,9 +112,7 @@ const ReportsPage = () => {
               reports.map((report, index) => (
                 <tr key={index}>
                   <td>{report.username}</td>
-                  <td>{ moment(report.createdDtm).format(
-                                                        "MMMM Do YYYY, h:mm a"
-                                                      )}</td>
+                  <td>{report.createdDtm}</td>
                   <td>{report.currentCourses}</td>
                   <td>{report.completedCourses}</td>
                   <td>{report.rating}</td>
@@ -144,8 +146,8 @@ const ReportsPage = () => {
             {reports.length > 0 ? (
               reports.map((report, index) => (
                 <tr key={index}>
-                  <td>{report.name}</td>
-                  <td>{report.dateJoined}</td>
+                  <td>{report.username}</td>
+                  <td>{report.createdDtm}</td>
                   <td>{report.enrolledCourses}</td>
                   <td>{report.completedCourses}</td>
                   <td>{report.averageGrade}</td>
