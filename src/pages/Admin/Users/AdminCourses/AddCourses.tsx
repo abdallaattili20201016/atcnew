@@ -1,19 +1,47 @@
-import React, { useState } from "react";
-import { Form, Button, Card, Col, Container, Row } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import { Form, Button, Card, Col, Container, Row, Spinner } from "react-bootstrap";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { db } from "../../../../App"; // Adjust path to your Firebase setup
+import { addDoc, collection, getDocs, serverTimestamp } from "firebase/firestore";
+import { db } from "../../../../App";
 import { toast } from "react-toastify";
 
 const AddCourses = () => {
   document.title = "Add New Course | Admin Dashboard";
 
+  const [trainers, setTrainers] = useState<any[]>([]);
+  const [loadingTrainers, setLoadingTrainers] = useState<boolean>(true);
+
+  // Fetch trainers from Firestore
+  const fetchTrainers = async () => {
+    try {
+      setLoadingTrainers(true);
+      const snapshot = await getDocs(collection(db, "users")); // Assuming trainers are in the 'users' collection
+      const trainersList = snapshot.docs
+        .map((doc) => {
+          const data = doc.data() as { id: string; role: string; displayName?: string; email: string };
+          const { id, ...rest } = data;
+          return { id: doc.id, ...rest };
+        })
+        .filter((user) => user.role === "trainer"); // Filter users with role 'trainer'
+      setTrainers(trainersList);
+    } catch (error) {
+      console.error("Error fetching trainers:", error);
+      toast.error("Failed to load trainers. Please try again.");
+    } finally {
+      setLoadingTrainers(false);
+    }
+  };
+  
+  useEffect(() => {
+    fetchTrainers();
+  }, []);
+
   // Form validation with Yup
   const validationSchema = Yup.object({
     title: Yup.string().required("Course title is required"),
     description: Yup.string().required("Description is required"),
-    trainerName: Yup.string().required("Trainer name is required"),
+    trainer_id: Yup.string().required("Trainer is required"),
     startDate: Yup.date().required("Start date is required"),
     endDate: Yup.date()
       .min(Yup.ref("startDate"), "End date must be after start date")
@@ -25,13 +53,16 @@ const AddCourses = () => {
     initialValues: {
       title: "",
       description: "",
-      trainerName: "",
+      trainer_id: "",
       startDate: "",
       endDate: "",
       status: "Active",
     },
     validationSchema,
-    onSubmit: async (values: { title: string; description: string; trainerName: string; startDate: string; endDate: string; status: string }, { resetForm }: { resetForm: () => void }) => {
+    onSubmit: async (
+      values: { title: string; description: string; trainer_id: string; startDate: string; endDate: string; status: string },
+      { resetForm }: { resetForm: () => void }
+    ) => {
       try {
         await addDoc(collection(db, "courses"), {
           ...values,
@@ -91,9 +122,7 @@ const AddCourses = () => {
                             value={formik.values.description}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
-                            isInvalid={
-                              formik.touched.description && !!formik.errors.description
-                            }
+                            isInvalid={formik.touched.description && !!formik.errors.description}
                           />
                           <Form.Control.Feedback type="invalid">
                             {formik.errors.description}
@@ -106,19 +135,26 @@ const AddCourses = () => {
                       <Col md={6}>
                         <Form.Group>
                           <Form.Label>Trainer Name</Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="trainerName"
-                            placeholder="Enter trainer name"
-                            value={formik.values.trainerName}
-                            onChange={formik.handleChange}
-                            onBlur={formik.handleBlur}
-                            isInvalid={
-                              formik.touched.trainerName && !!formik.errors.trainerName
-                            }
-                          />
+                          {loadingTrainers ? (
+                            <Spinner animation="border" size="sm" />
+                          ) : (
+                            <Form.Select
+                              name="trainer_id"
+                              value={formik.values.trainer_id}
+                              onChange={formik.handleChange}
+                              onBlur={formik.handleBlur}
+                              isInvalid={formik.touched.trainer_id && !!formik.errors.trainer_id}
+                            >
+                              <option value="">Select Trainer</option>
+                              {trainers.map((trainer) => (
+                                <option key={trainer.id} value={trainer.id}>
+                                  {trainer.displayName || trainer.email}
+                                </option>
+                              ))}
+                            </Form.Select>
+                          )}
                           <Form.Control.Feedback type="invalid">
-                            {formik.errors.trainerName}
+                            {formik.errors.trainer_id}
                           </Form.Control.Feedback>
                         </Form.Group>
                       </Col>
@@ -134,9 +170,7 @@ const AddCourses = () => {
                             value={formik.values.startDate}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
-                            isInvalid={
-                              formik.touched.startDate && !!formik.errors.startDate
-                            }
+                            isInvalid={formik.touched.startDate && !!formik.errors.startDate}
                           />
                           <Form.Control.Feedback type="invalid">
                             {formik.errors.startDate}
