@@ -1,18 +1,27 @@
 import React, { useState } from "react";
-import { Card, Col, Container, Row, Form, Button, Spinner } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { Form, Button, Card, Col, Container, Row } from "react-bootstrap";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { collection, addDoc } from "firebase/firestore";
-import "firebase/storage";
-import { db } from "../../../App"
-import { toast, ToastContainer } from "react-toastify";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { db } from "../../../../App"; // Adjust path to your Firebase setup
+import { toast } from "react-toastify";
 
 const AddCourses = () => {
-  const navigate = useNavigate();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  document.title = "Add New Course | Admin Dashboard";
 
-  const validation = useFormik({
+  // Form validation with Yup
+  const validationSchema = Yup.object({
+    title: Yup.string().required("Course title is required"),
+    description: Yup.string().required("Description is required"),
+    trainerName: Yup.string().required("Trainer name is required"),
+    startDate: Yup.date().required("Start date is required"),
+    endDate: Yup.date()
+      .min(Yup.ref("startDate"), "End date must be after start date")
+      .required("End date is required"),
+    status: Yup.string().required("Please select a status"),
+  });
+
+  const formik = useFormik({
     initialValues: {
       title: "",
       description: "",
@@ -21,112 +30,167 @@ const AddCourses = () => {
       endDate: "",
       status: "Active",
     },
-    validationSchema: Yup.object({
-      title: Yup.string().required("Please Enter Title"),
-      description: Yup.string().required("Please Enter Description"),
-      trainerName: Yup.string().required("Please Enter Trainer Name"),
-      startDate: Yup.date().required("Please Enter Start Date"),
-      endDate: Yup.date().min(
-        Yup.ref("startDate"),
-        "End date must be after start date"
-      ),
-    }),
-    onSubmit: async (values: { title: string; description: string; trainerName: string; startDate: string; endDate: string; status: string }) => {
-      setIsSubmitting(true);
+    validationSchema,
+    onSubmit: async (values: { title: string; description: string; trainerName: string; startDate: string; endDate: string; status: string }, { resetForm }: { resetForm: () => void }) => {
       try {
-        await addDoc(collection(db, "Courses"), values);
-        toast.success("Course added successfully");
-        navigate("/view-courses");
+        await addDoc(collection(db, "courses"), {
+          ...values,
+          createdOn: serverTimestamp(),
+        });
+        toast.success("Course added successfully!");
+        resetForm();
       } catch (error) {
         console.error("Error adding course:", error);
-        toast.error("Failed to add course.");
-      } finally {
-        setIsSubmitting(false);
+        toast.error("Failed to add course. Please try again.");
       }
     },
   });
 
   return (
     <React.Fragment>
-      <Row className="justify-content-center">
-        <Col md={8}>
-          <Card>
-            <Card.Body>
-              <h1 className="mb-4">Add New Course</h1>
-              <Form onSubmit={validation.handleSubmit}>
-                <Form.Group className="mb-3" controlId="title">
-                  <Form.Label>Course Title</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Enter course title"
-                    {...validation.getFieldProps("title")}
-                    isInvalid={!!validation.errors.title && validation.touched.title}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {validation.errors.title}
-                  </Form.Control.Feedback>
-                </Form.Group>
+      <div className="page-content">
+        <Container fluid>
+          <h2 className="my-4">Create New Course</h2>
+          <Row className="justify-content-center">
+            <Col xxl={9}>
+              <Card>
+                <Card.Body>
+                  <Form onSubmit={formik.handleSubmit}>
+                    <Row className="mb-3">
+                      <Col md={12}>
+                        <Form.Group>
+                          <Form.Label>Course Title</Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="title"
+                            placeholder="Enter course title"
+                            value={formik.values.title}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            isInvalid={formik.touched.title && !!formik.errors.title}
+                          />
+                          <Form.Control.Feedback type="invalid">
+                            {formik.errors.title}
+                          </Form.Control.Feedback>
+                        </Form.Group>
+                      </Col>
+                    </Row>
 
-                <Form.Group className="mb-3" controlId="description">
-                  <Form.Label>Description</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    rows={4}
-                    placeholder="Enter course description"
-                    {...validation.getFieldProps("description")}
-                    isInvalid={!!validation.errors.description && validation.touched.description}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {validation.errors.description}
-                  </Form.Control.Feedback>
-                </Form.Group>
+                    <Row className="mb-3">
+                      <Col md={12}>
+                        <Form.Group>
+                          <Form.Label>Description</Form.Label>
+                          <Form.Control
+                            as="textarea"
+                            name="description"
+                            rows={5}
+                            placeholder="Enter course description"
+                            value={formik.values.description}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            isInvalid={
+                              formik.touched.description && !!formik.errors.description
+                            }
+                          />
+                          <Form.Control.Feedback type="invalid">
+                            {formik.errors.description}
+                          </Form.Control.Feedback>
+                        </Form.Group>
+                      </Col>
+                    </Row>
 
-                <Form.Group className="mb-3" controlId="trainerName">
-                  <Form.Label>Trainer Name</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Enter trainer name"
-                    {...validation.getFieldProps("trainerName")}
-                    isInvalid={!!validation.errors.trainerName && validation.touched.trainerName}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {validation.errors.trainerName}
-                  </Form.Control.Feedback>
-                </Form.Group>
+                    <Row className="mb-3">
+                      <Col md={6}>
+                        <Form.Group>
+                          <Form.Label>Trainer Name</Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="trainerName"
+                            placeholder="Enter trainer name"
+                            value={formik.values.trainerName}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            isInvalid={
+                              formik.touched.trainerName && !!formik.errors.trainerName
+                            }
+                          />
+                          <Form.Control.Feedback type="invalid">
+                            {formik.errors.trainerName}
+                          </Form.Control.Feedback>
+                        </Form.Group>
+                      </Col>
+                    </Row>
 
-                <Form.Group className="mb-3" controlId="startDate">
-                  <Form.Label>Start Date</Form.Label>
-                  <Form.Control
-                    type="date"
-                    {...validation.getFieldProps("startDate")}
-                    isInvalid={!!validation.errors.startDate && validation.touched.startDate}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {validation.errors.startDate}
-                  </Form.Control.Feedback>
-                </Form.Group>
+                    <Row className="mb-3">
+                      <Col md={6}>
+                        <Form.Group>
+                          <Form.Label>Start Date</Form.Label>
+                          <Form.Control
+                            type="date"
+                            name="startDate"
+                            value={formik.values.startDate}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            isInvalid={
+                              formik.touched.startDate && !!formik.errors.startDate
+                            }
+                          />
+                          <Form.Control.Feedback type="invalid">
+                            {formik.errors.startDate}
+                          </Form.Control.Feedback>
+                        </Form.Group>
+                      </Col>
+                      <Col md={6}>
+                        <Form.Group>
+                          <Form.Label>End Date</Form.Label>
+                          <Form.Control
+                            type="date"
+                            name="endDate"
+                            value={formik.values.endDate}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            isInvalid={formik.touched.endDate && !!formik.errors.endDate}
+                          />
+                          <Form.Control.Feedback type="invalid">
+                            {formik.errors.endDate}
+                          </Form.Control.Feedback>
+                        </Form.Group>
+                      </Col>
+                    </Row>
 
-                <Form.Group className="mb-3" controlId="endDate">
-                  <Form.Label>End Date</Form.Label>
-                  <Form.Control
-                    type="date"
-                    {...validation.getFieldProps("endDate")}
-                    isInvalid={!!validation.errors.endDate && validation.touched.endDate}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {validation.errors.endDate}
-                  </Form.Control.Feedback>
-                </Form.Group>
+                    <Row className="mb-3">
+                      <Col md={6}>
+                        <Form.Group>
+                          <Form.Label>Status</Form.Label>
+                          <Form.Select
+                            name="status"
+                            value={formik.values.status}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            isInvalid={formik.touched.status && !!formik.errors.status}
+                          >
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                          </Form.Select>
+                          <Form.Control.Feedback type="invalid">
+                            {formik.errors.status}
+                          </Form.Control.Feedback>
+                        </Form.Group>
+                      </Col>
+                    </Row>
 
-                <Button type="submit" variant="primary" className="w-100" disabled={isSubmitting}>
-                  {isSubmitting ? <Spinner size="sm" animation="border" /> : "Add Course"}
-                </Button>
-              </Form>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-      <ToastContainer />
+                    <div className="text-end">
+                      <Button type="submit" variant="primary">
+                        Add Course
+                      </Button>
+                    </div>
+                  </Form>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        </Container>
+      </div>
     </React.Fragment>
   );
 };

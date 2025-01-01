@@ -1,10 +1,11 @@
-import React, { useEffect, useState, useMemo } from "react";
-import { Table, Card, Button, Container, Row, Col, Spinner } from "react-bootstrap";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
+import { Card, Col, Form, Row, Button, Modal, Spinner, Container } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
-import "firebase/storage";
-import { db } from "../../../App" // Adjust the import path as needed
-import { toast, ToastContainer } from "react-toastify";
+import { db } from "../../../../App"; // Adjust the path to your Firebase config
+import TableContainer from "../../../../Common/Tabledata/TableContainer";
+import NoSearchResult from "../../../../Common/Tabledata/NoSearchResult";
 import "react-toastify/dist/ReactToastify.css";
 
 const ViewCourses = () => {
@@ -12,14 +13,29 @@ const ViewCourses = () => {
   const [courses, setCourses] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const loadCourses = async () => {
+  // Load Courses
+  const loadCourses = async (searchTerm?: string) => {
     try {
       setIsLoading(true);
-      const snapshot = await getDocs(collection(db, "Courses"));
-      const coursesData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const snapshot = await getDocs(collection(db, "courses"));
+      const coursesData = snapshot.docs
+        .map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            title: data.title || "",
+            trainerName: data.trainerName || "",
+            enrolledTrainees: data.enrolledTrainees || [],
+            startDate: data.startDate || "",
+            endDate: data.endDate || "",
+            status: data.status || "",
+          };
+        })
+        .filter((course) =>
+          searchTerm
+            ? course.title.toLowerCase().includes(searchTerm.toLowerCase())
+            : true
+        );
       setCourses(coursesData);
     } catch (error) {
       console.error("Error loading courses:", error);
@@ -33,9 +49,10 @@ const ViewCourses = () => {
     loadCourses();
   }, []);
 
+  // Handle Delete Course
   const handleDeleteCourse = async (courseId: string) => {
     try {
-      await deleteDoc(doc(db, "Courses", courseId));
+      await deleteDoc(doc(db, "courses", courseId));
       toast.success("Course deleted successfully.");
       loadCourses();
     } catch (error) {
@@ -44,17 +61,71 @@ const ViewCourses = () => {
     }
   };
 
+  // Handle Search
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const searchTerm = e.target.value.trim();
+    loadCourses(searchTerm);
+  };
+
   const columns = useMemo(
     () => [
-      { Header: "Title", accessor: "title" },
-      { Header: "Trainer", accessor: "trainerName" },
-      { Header: "Enrolled Trainees", accessor: "enrolledTrainees" },
-      { Header: "Start Date", accessor: "startDate" },
-      { Header: "End Date", accessor: "endDate" },
-      { Header: "Status", accessor: "status" },
       {
-        Header: "Action",
-        accessor: "action",
+        Header: "Course Title",
+        accessor: "title",
+        Filter: false,
+        isSortable: true,
+        Cell: (cell: any) => <>{cell.row.original.title}</>,
+      },
+      {
+        Header: "Trainer",
+        accessor: "trainerName",
+        Filter: false,
+        isSortable: true,
+        Cell: (cell: any) => <>{cell.row.original.trainerName || "N/A"}</>,
+      },
+      {
+        Header: "Enrolled Trainees",
+        accessor: "enrolledTrainees",
+        Filter: false,
+        isSortable: true,
+        Cell: (cell: any) => <>{cell.row.original.enrolledTrainees?.length || 0}</>,
+      },
+      {
+        Header: "Start Date",
+        accessor: "startDate",
+        Filter: false,
+        isSortable: true,
+        Cell: (cell: any) => <>{cell.row.original.startDate || "N/A"}</>,
+      },
+      {
+        Header: "End Date",
+        accessor: "endDate",
+        Filter: false,
+        isSortable: true,
+        Cell: (cell: any) => <>{cell.row.original.endDate || "N/A"}</>,
+      },
+      {
+        Header: "Status",
+        accessor: "status",
+        Filter: false,
+        isSortable: true,
+        Cell: (cell: any) => (
+          <span
+            className={`badge ${
+              cell.row.original.status === "Active"
+                ? "bg-success-subtle text-success"
+                : "bg-warning-subtle text-warning"
+            }`}
+          >
+            {cell.row.original.status}
+          </span>
+        ),
+      },
+      {
+        Header: "Actions",
+        accessor: "actions",
+        Filter: false,
+        isSortable: false,
         Cell: (cell: any) => (
           <div className="d-flex gap-2">
             <Button
@@ -75,74 +146,70 @@ const ViewCourses = () => {
         ),
       },
     ],
-    []
+    [navigate]
   );
 
   return (
-    <Container fluid>
-      <Row className="py-4">
-        <Col>
-          <h1>View Courses</h1>
-        </Col>
-        <Col className="text-end">
-          <Button variant="primary" onClick={() => navigate("/add-course")}>
-            Add New Course
-          </Button>
+    <React.Fragment>
+      <div className="page-content">
+        <Container fluid>
+          <h2 className="my-4">Announcements</h2>
+          <Row className="mb-4">
+            <Col className="text-end">
+              <Button
+                variant="primary"
+                onClick={() => navigate("/AddCourses")}
+              >
+                Add New Course
+              </Button>
+            </Col>
+          </Row>
+
+      <Row>
+        <Col className="mb-4">
+          <Form.Control
+            type="text"
+            placeholder="Search by Course Title"
+            onChange={handleSearch}
+          />
         </Col>
       </Row>
-      <Card>
-        <Card.Body>
-          {isLoading ? (
-            <Spinner animation="border" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </Spinner>
-          ) : courses.length > 0 ? (
-            <Table responsive bordered hover>
-              <thead>
-                <tr>
-                  {columns.map((col) => (
-                    <th key={col.Header}>{col.Header}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {courses.map((course, index) => (
-                  <tr key={index}>
-                    <td>{course.title}</td>
-                    <td>{course.trainerName}</td>
-                    <td>{course.enrolledTrainees?.length || 0}</td>
-                    <td>{course.startDate}</td>
-                    <td>{course.endDate}</td>
-                    <td>{course.status}</td>
-                    <td>
-                      <div className="d-flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="info"
-                          onClick={() => navigate(`/edit-course/${course.id}`)}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="danger"
-                          onClick={() => handleDeleteCourse(course.id)}
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          ) : (
-            <p>No courses found.</p>
-          )}
-        </Card.Body>
-      </Card>
+
+      <Row>
+        <Col xl={12}>
+          <Card>
+            <Card.Body>
+              {isLoading ? (
+                <div className="text-center">
+                  <Spinner animation="border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </Spinner>
+                </div>
+              ) : courses.length > 0 ? (
+                <TableContainer
+                  isPagination={true}
+                  columns={columns}
+                  data={courses || []}
+                  customPageSize={9}
+                  divClassName="table-card table-responsive"
+                  tableClass="table-hover table-nowrap align-middle mb-0"
+                  isBordered={false}
+                  PaginationClass="align-items-center mt-4 gy-3"
+                />
+              ) : (
+                <NoSearchResult
+                  title1="No Courses Found"
+                  title2="Try adjusting your search or adding a new course."
+                />
+              )}
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
       <ToastContainer />
-    </Container>
+      </Container>
+      </div>
+    </React.Fragment>
   );
 };
 
