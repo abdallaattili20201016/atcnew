@@ -75,19 +75,17 @@ const Login = () => {
               <div className="auth-full-page-content d-flex min-vh-100 py-sm-5 py-4">
                 <div className="w-100">
                   <div className="d-flex flex-column h-100 py-0 py-xl-4">
-                    <div className="text-center mb-5">
-                      <Link to="/">
-                        <span className="logo-lg">
-                          <img src={logoDark} alt="" height="100" width="181" />
-                        </span>
-                      </Link>
-                    </div>
+
 
                     <Card className="my-auto overflow-hidden">
                       <Row className="g-0">
                         <Col lg={12}>
-                          <Card.Body className="p-lg-5 p-4">
+                          <Card.Body >
                             <div className="text-center">
+                            
+           
+                          <img src={logoDark} alt="" height="100" width="181" />
+                 
                               <h5 className="mb-0">Welcome Back!</h5>
                               <p className="text-muted mt-2">
                                 Sign in to continue to Academic Training Center.

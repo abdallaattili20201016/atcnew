@@ -35,6 +35,9 @@ const AddCourses = () => {
       try {
         await addDoc(collection(db, "courses"), {
           ...values,
+          students: [],
+          assignments: [],
+          documents: [],
           createdOn: serverTimestamp(),
         });
         toast.success("Course added successfully!");
