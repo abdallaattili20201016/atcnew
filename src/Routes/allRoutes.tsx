@@ -24,6 +24,8 @@ import TraineeCoursesList from "../pages/Trainee/TraineeCoursesList";
 import TraineeCoursesDetails from "../pages/Trainee/TraineeCoursesDetails";
 import AssignmentSubmitList from "../pages/Trainer/AssignmentSubmitList";
 import TrainerCoursesDetails from "../pages/Trainer/TrainerCoursesDetails";
+import ViewCourses from "../pages/Admin/Users/AdminCourses/ViewCourses";
+import AddCourses from "../pages/Admin/Users/AdminCourses/AddCourses";
 
 
 const auth = getAuth(); // Get the authenticated user
@@ -88,6 +90,15 @@ const authProtectedRoutes: Array<RouteObject> = [
     path: "/assignment-submit-list",
     component: <AssignmentSubmitList />,
 },
+{
+  path: "/ViewCourses",
+  component: <ViewCourses />,
+},
+{
+  path: "/AddCourses",
+  component: <AddCourses />,
+},
+
   
   // ...other routes...
 ];

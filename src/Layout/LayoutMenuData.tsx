@@ -38,10 +38,10 @@ const AdminNavdata = () => {
     },
 
     {
-      id: "courses",
+      id: "ViewCourses",
       label: "Courses",
       icon: "las la-house-damage",
-      link: "/admin-courses",
+      link: "/ViewCourses",
     },
     {
       id: "messages",
