@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { Card, Col, Form, Row, Button, Modal, Spinner, Container } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc, getDoc } from "firebase/firestore";
 import { db } from "../../../../App"; // Adjust the path to your Firebase config
 import TableContainer from "../../../../Common/Tabledata/TableContainer";
 import NoSearchResult from "../../../../Common/Tabledata/NoSearchResult";
@@ -18,25 +18,36 @@ const ViewCourses = () => {
     try {
       setIsLoading(true);
       const snapshot = await getDocs(collection(db, "courses"));
-      const coursesData = snapshot.docs
-        .map((doc) => {
-          const data = doc.data();
+      const coursesData = await Promise.all(
+        snapshot.docs.map(async (courseDoc) => {
+          const courseData = courseDoc.data();
+          const trainerRef = doc(db, "users", courseData.trainer_id);
+          const trainerDoc = await getDoc(trainerRef);
+          const trainerData = trainerDoc.data() as { displayName?: string; email?: string } || {};
+          const trainerName = trainerDoc.exists() ? trainerData.displayName || trainerData.email : "N/A";
+
+          const enrolledTrainees = Array.isArray(courseData.students) ? courseData.students : [];
+  
           return {
-            id: doc.id,
-            title: data.title || "",
-            trainerName: data.trainerName || "",
-            enrolledTrainees: data.enrolledTrainees || [],
-            startDate: data.startDate || "",
-            endDate: data.endDate || "",
-            status: data.status || "",
+            id: courseDoc.id,
+            title: courseData.title || "",
+            trainerName,
+            enrolledTrainees,
+            startDate: courseData.startDate || "",
+            endDate: courseData.endDate || "",
+            status: courseData.status || "",
           };
         })
-        .filter((course) =>
-          searchTerm
-            ? course.title.toLowerCase().includes(searchTerm.toLowerCase())
-            : true
-        );
-      setCourses(coursesData);
+      );
+  
+  
+
+      const filteredCourses = coursesData.filter((course) =>
+        searchTerm
+          ? course.title.toLowerCase().includes(searchTerm.toLowerCase())
+          : true
+      );
+      setCourses(filteredCourses);
     } catch (error) {
       console.error("Error loading courses:", error);
       toast.error("Failed to load courses. Please try again.");
@@ -88,7 +99,7 @@ const ViewCourses = () => {
         accessor: "enrolledTrainees",
         Filter: false,
         isSortable: true,
-        Cell: (cell: any) => <>{cell.row.original.enrolledTrainees?.length || 0}</>,
+        Cell: (cell: any) => <>{cell.row.original.enrolledTrainees.length || 0}</>,
       },
       {
         Header: "Start Date",
@@ -153,7 +164,7 @@ const ViewCourses = () => {
     <React.Fragment>
       <div className="page-content">
         <Container fluid>
-          <h2 className="my-4">Announcements</h2>
+          <h2 className="my-4">View Courses</h2>
           <Row className="mb-4">
             <Col className="text-end">
               <Button

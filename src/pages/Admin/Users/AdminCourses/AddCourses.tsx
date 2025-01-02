@@ -5,6 +5,8 @@ import * as Yup from "yup";
 import { addDoc, collection, getDocs, serverTimestamp } from "firebase/firestore";
 import { db } from "../../../../App";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+
 
 const AddCourses = () => {
   document.title = "Add New Course | Admin Dashboard";
@@ -32,7 +34,9 @@ const AddCourses = () => {
       setLoadingTrainers(false);
     }
   };
-  
+  const navigate = useNavigate();
+
+
   useEffect(() => {
     fetchTrainers();
   }, []);
@@ -46,6 +50,9 @@ const AddCourses = () => {
     endDate: Yup.date()
       .min(Yup.ref("startDate"), "End date must be after start date")
       .required("End date is required"),
+    price: Yup.number()
+      .required("Price is required")
+      .min(0, "Price must be a positive number"),
     status: Yup.string().required("Please select a status"),
   });
 
@@ -56,11 +63,20 @@ const AddCourses = () => {
       trainer_id: "",
       startDate: "",
       endDate: "",
+      price: "",
       status: "Active",
     },
     validationSchema,
     onSubmit: async (
-      values: { title: string; description: string; trainer_id: string; startDate: string; endDate: string; status: string },
+      values: {
+        title: string;
+        description: string;
+        trainer_id: string;
+        startDate: string;
+        endDate: string;
+        price: number;
+        status: string;
+      },
       { resetForm }: { resetForm: () => void }
     ) => {
       try {
@@ -73,6 +89,7 @@ const AddCourses = () => {
         });
         toast.success("Course added successfully!");
         resetForm();
+        navigate("/ViewCourses");
       } catch (error) {
         console.error("Error adding course:", error);
         toast.error("Failed to add course. Please try again.");
@@ -190,6 +207,26 @@ const AddCourses = () => {
                           />
                           <Form.Control.Feedback type="invalid">
                             {formik.errors.endDate}
+                          </Form.Control.Feedback>
+                        </Form.Group>
+                      </Col>
+                    </Row>
+
+                    <Row className="mb-3">
+                      <Col md={6}>
+                        <Form.Group>
+                          <Form.Label>Price</Form.Label>
+                          <Form.Control
+                            type="number"
+                            name="price"
+                            placeholder="Enter course price"
+                            value={formik.values.price}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            isInvalid={formik.touched.price && !!formik.errors.price}
+                          />
+                          <Form.Control.Feedback type="invalid">
+                            {formik.errors.price}
                           </Form.Control.Feedback>
                         </Form.Group>
                       </Col>

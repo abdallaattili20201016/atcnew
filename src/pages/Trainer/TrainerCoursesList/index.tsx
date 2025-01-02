@@ -17,6 +17,7 @@ import TableContainer from "../../../Common/Tabledata/TableContainer";
 import NoSearchResult from "../../../Common/Tabledata/NoSearchResult";
 import EditProductList from "../../../Common/CrudModal/EditProductList";
 import { DeleteModal } from "../../../Common/DeleteModal";
+ import { db } from "../../../App"; 
 
 const TrainerCoursesList = () => {
   document.title = "Trainer Courses List";
@@ -58,23 +59,7 @@ const TrainerCoursesList = () => {
 
   const columns: columnsType[] = useMemo(
     () => [
-      // {
-      //   Header: () => (
-      //     <Form>
-      //       <Form.Check type="checkbox" />
-      //     </Form>
-      //   ),
-      //   accessor: "id",
-      //   key: "id",
-      //   Filter: false,
-      //   isSortable: false,
-      //   width: 50,
-      //   Cell: () => (
-      //     <Form>
-      //       <Form.Check type="checkbox" />
-      //     </Form>
-      //   ),
-      // },
+      
       {
         Header: "COURSE NAME",
         accessor: "productName",
@@ -93,33 +78,13 @@ const TrainerCoursesList = () => {
         },
       },
 
-      {
-        Header: "CATEGORY",
-        accessor: "category",
-        Filter: false,
-        isSortable: true,
-        Cell: (cell: any) => <>{cell.row.original.category}</>,
-      },
-      // {
-      //   Header: "IN STOCK",
-      //   accessor: "inStock",
-      //   Filter: false,
-      //   isSortable: true,
-      // },
-      {
-        Header: "Quantity",
-        accessor: "quantity",
-        Filter: false,
-        isSortable: true,
-        Cell: (cell: any) => <>{cell.row.original.quantity}</>,
-      },
 
       {
-        Header: "PRICE",
-        accessor: "price",
+        Header: "LOCATION",
+        accessor: "location",
         Filter: false,
         isSortable: true,
-        Cell: (cell: any) => <>${cell.row.original.price}</>,
+        Cell: (cell: any) => <>{cell.row.original.location}</>,
       },
       {
         Header: "Exp Date",
