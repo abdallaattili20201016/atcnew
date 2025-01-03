@@ -7,7 +7,6 @@ import { db } from "../../../../App";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
-
 const AddCourses = () => {
   document.title = "Add New Course | Admin Dashboard";
 
@@ -36,7 +35,6 @@ const AddCourses = () => {
   };
   const navigate = useNavigate();
 
-
   useEffect(() => {
     fetchTrainers();
   }, []);
@@ -53,6 +51,7 @@ const AddCourses = () => {
     price: Yup.number()
       .required("Price is required")
       .min(0, "Price must be a positive number"),
+    location: Yup.string().required("Location is required"),
     status: Yup.string().required("Please select a status"),
   });
 
@@ -64,6 +63,7 @@ const AddCourses = () => {
       startDate: "",
       endDate: "",
       price: "",
+      location: "",
       status: "Active",
     },
     validationSchema,
@@ -75,6 +75,7 @@ const AddCourses = () => {
         startDate: string;
         endDate: string;
         price: number;
+        location: string;
         status: string;
       },
       { resetForm }: { resetForm: () => void }
@@ -227,6 +228,26 @@ const AddCourses = () => {
                           />
                           <Form.Control.Feedback type="invalid">
                             {formik.errors.price}
+                          </Form.Control.Feedback>
+                        </Form.Group>
+                      </Col>
+                    </Row>
+
+                    <Row className="mb-3">
+                      <Col md={6}>
+                        <Form.Group>
+                          <Form.Label>Location</Form.Label>
+                          <Form.Control
+                            type="text"
+                            name="location"
+                            placeholder="Enter course location"
+                            value={formik.values.location}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            isInvalid={formik.touched.location && !!formik.errors.location}
+                          />
+                          <Form.Control.Feedback type="invalid">
+                            {formik.errors.location}
                           </Form.Control.Feedback>
                         </Form.Group>
                       </Col>

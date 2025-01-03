@@ -85,16 +85,17 @@ const AllCourses = () => {
                     </div>
                     <h4 className="card-title">{course.title}</h4>
                     <p className="card-text text-muted">{course.description}</p>
+                    <p className="card-text">
+                      <strong>Location:</strong> {course.location || "N/A"}
+                    </p>
                     <Button
-                      // to={`/courses/${course.id}`}
                       onClick={async () => {
                         if (course.isEnrolled) {
-                          // window.location.href = "/trainee-courses-list";
                           navigate("/trainee-courses-list");
                         } else {
                           try {
                             await firebaseBackend.handleEnrollCourse(course.id);
-                            toast.success("enroll Course successfully");
+                            toast.success("Enrolled in course successfully");
                           } catch (error) {
                             toast.error(
                               `Error updating course enrollment: ${error}`
@@ -106,7 +107,7 @@ const AllCourses = () => {
                       }}
                       className="btn btn-primary"
                     >
-                      {course.isEnrolled ? "Go To My Courses" : "Enrolle"}
+                      {course.isEnrolled ? "Go To My Courses" : "Enroll"}
                     </Button>
                   </Card>
                 </Col>
