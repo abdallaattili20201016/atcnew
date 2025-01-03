@@ -6,13 +6,13 @@ import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../../../App";
 import { getAuth } from "firebase/auth"; // Import Firebase Auth for the user info
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const NewAnnouncement = () => {
   document.title = "New Announcement | Admin Dashboard";
 
+  const navigate = useNavigate();
   const auth = getAuth(); // Get the authenticated user
-  //const currentUser = auth.currentUser;
-  
   const currentUser = JSON.parse(sessionStorage.getItem("user_details") || '{}'); // Get the authenticated user
 
   // Form validation with Yup
@@ -38,16 +38,15 @@ const NewAnnouncement = () => {
           ...values,
           createdOn: serverTimestamp(),
           createdBy: currentUser
-          ? {
-              
-              email: currentUser.email,
-              displayName: currentUser.username || "Unknown User",
-            }
-          : {  email: "unknown", displayName: "Unknown User" }
-        
+            ? {
+                email: currentUser.email,
+                displayName: currentUser.username || "Unknown User",
+              }
+            : { email: "unknown", displayName: "Unknown User" },
         });
         toast.success("Announcement created successfully!");
         resetForm();
+        navigate("/announcements-table"); // Navigate after successful save
       } catch (error) {
         console.error("Error creating announcement:", error);
         toast.error("Failed to create announcement. Please try again.");
@@ -59,8 +58,7 @@ const NewAnnouncement = () => {
     <React.Fragment>
       <div className="page-content">
         <Container fluid>
-        <h2 className="my-4">Creat New Announcement</h2>
-
+          <h2 className="my-4">Create New Announcement</h2>
           <Row className="justify-content-center">
             <Col xxl={9}>
               <Card>
@@ -98,9 +96,7 @@ const NewAnnouncement = () => {
                             value={formik.values.description}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
-                            isInvalid={
-                              formik.touched.description && !!formik.errors.description
-                            }
+                            isInvalid={formik.touched.description && !!formik.errors.description}
                           />
                           <Form.Control.Feedback type="invalid">
                             {formik.errors.description}
