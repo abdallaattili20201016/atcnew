@@ -440,43 +440,52 @@ export const sendMessage = async (senderId: string, recipientId: string, content
 
 export const fetchRecentChats = async (userId: string): Promise<Message[]> => {
   try {
-    // Query only messages where the user is the recipient
-    const q = query(
+    const q1 = query(
+      collection(db, "Messages"),
+      where("senderId", "==", userId),
+      orderBy("timestamp", "desc"),
+      limit(10)
+    );
+    const q2 = query(
       collection(db, "Messages"),
       where("recipientId", "==", userId),
       orderBy("timestamp", "desc"),
-      limit(5)
+      limit(10)
     );
-
-    const snapshot = await getDocs(q);
-    const results = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
+    const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+    let results = [...snap1.docs, ...snap2.docs].map((doc) => ({
+      id: doc.id, ...doc.data(),
     })) as Message[];
 
-    // Sort by timestamp safely
-    results.sort((a, b) => {
-      const aTime = a.timestamp instanceof Timestamp
-        ? a.timestamp.toDate()
-        : new Date(a.timestamp as any);
-      const bTime = b.timestamp instanceof Timestamp
-        ? b.timestamp.toDate()
-        : new Date(b.timestamp as any);
-      return bTime.getTime() - aTime.getTime();
+    // Deduplicate by the "otherUserId"
+    const map = new Map<string, Message>();
+    results.forEach(m => {
+      const otherUserId = (m.senderId === userId) ? m.recipientId : m.senderId;
+      if (!map.has(otherUserId)) map.set(otherUserId, m);
+      else {
+        // keep the newest
+        const existing = map.get(otherUserId)!;
+        const existingTime = existing.timestamp instanceof Timestamp
+          ? existing.timestamp.toDate().getTime()
+          : new Date(existing.timestamp).getTime();
+        const currentTime = m.timestamp instanceof Timestamp
+          ? m.timestamp.toDate().getTime()
+          : new Date(m.timestamp).getTime();
+        if (currentTime > existingTime) map.set(otherUserId, m);
+      }
+    });
+    results = Array.from(map.values()).sort((a, b) => {
+      const at = a.timestamp instanceof Timestamp ? a.timestamp.toDate() : new Date(a.timestamp);
+      const bt = b.timestamp instanceof Timestamp ? b.timestamp.toDate() : new Date(b.timestamp);
+      return bt.getTime() - at.getTime();
     });
 
-    // Fetch all users to map IDs to names
     const allUsers = await fetchAllUsers();
     const userMap = Object.fromEntries(allUsers.map(u => [u.id, u.name || "Unknown"]));
-
-    // Assign senderName using userMap
-    results.forEach((msg) => {
-      msg.senderName = userMap[msg.senderId] || "Unknown";
-      // Assign recipientName as "You" if recipientId matches userId
-      msg.recipientName = msg.recipientId === userId ? "You" : (userMap[msg.recipientId] || "Unknown");
+    results.forEach(m => {
+      m.senderName = userMap[m.senderId] || "Unknown";
+      m.recipientName = (m.recipientId === userId) ? "You" : (userMap[m.recipientId] || "Unknown");
     });
-
-    console.log("Fetched Recent Chats (recipient only):", results);
     return results;
   } catch (error) {
     console.error("Error fetching recent chats:", error);
@@ -525,7 +534,7 @@ export const fetchAllUsers = async () => {
     const data = doc.data();
     return {
       id: doc.id,
-      name: data.name || "Unknown",
+      name: data.username || "Unknown",
       ...data,
     };
   });
@@ -543,6 +552,22 @@ export const fetchUserNameById = async (userId: string): Promise<string> => {
   } catch (error) {
     console.error("Error fetching user name:", error);
     return "Unknown";
+  }
+};
+
+/**
+ * Logs an event to the audit logs.
+ */
+export const logEvent = async (action: string, details: any) => {
+  try {
+    const db = firebase.firestore();
+    await db.collection("auditLogs").add({
+      action,
+      details,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+  } catch (error) {
+    console.error("Error logging event:", error);
   }
 };
 

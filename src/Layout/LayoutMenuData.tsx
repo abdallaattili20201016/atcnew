@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 const AdminNavdata = () => {
   const menuItems: any = [
@@ -16,7 +16,6 @@ const AdminNavdata = () => {
       label: "Pages",
       isHeader: true,
     },
-
     {
       id: "users",
       label: "Users",
@@ -29,14 +28,12 @@ const AdminNavdata = () => {
       icon: "las la-house-damage",
       link: "/adminreports",
     },
-
     {
       id: "announcements",
       label: "Announcements",
       icon: "las la-house-damage",
       link: "/announcements-table",
     },
-
     {
       id: "courses",
       label: "Courses",
@@ -49,12 +46,10 @@ const AdminNavdata = () => {
       icon: "las la-envelope",
       link: "/messages",
     },
-
     {
       label: "More",
       isHeader: true,
     },
-
     {
       id: "aboutus",
       label: "About Us",
@@ -81,7 +76,6 @@ const TrainerNavdata = () => {
       label: "Pages",
       isHeader: true,
     },
-
     {
       id: "trainer-courses-list",
       label: "Courses",
@@ -104,7 +98,6 @@ const TrainerNavdata = () => {
       label: "More",
       isHeader: true,
     },
-
     {
       id: "aboutus",
       label: "About Us",
@@ -131,14 +124,12 @@ const TraineeNavdata = () => {
       label: "Pages",
       isHeader: true,
     },
-
     {
       id: "trainer-courses-list",
       label: "Courses",
       icon: "las la-house-damage",
       link: "/trainer-courses-list",
     },
-
     {
       id: "payment",
       label: "Payment",
@@ -149,7 +140,6 @@ const TraineeNavdata = () => {
       label: "More",
       isHeader: true,
     },
-
     {
       id: "aboutus",
       label: "About Us",

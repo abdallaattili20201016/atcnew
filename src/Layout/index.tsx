@@ -1,5 +1,4 @@
-import React, { ReactNode, useEffect } from "react";
-
+import React, { ReactNode } from "react";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import withRouter from "../Common/withRouter";
@@ -7,6 +6,7 @@ import withRouter from "../Common/withRouter";
 interface LayoutProps {
   children: ReactNode;
 }
+
 const Layout = (props: LayoutProps) => {
   return (
     <React.Fragment>

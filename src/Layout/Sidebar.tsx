@@ -1,10 +1,7 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import SimpleBar from "simplebar-react";
-//import logo
 import logoLight from "../assets/images/logo-dark.png";
-
-//Import Components
 import VerticalLayout from "./VerticalLayouts/index";
 import { Container } from "react-bootstrap";
 
@@ -19,7 +16,6 @@ const Sidebar = ({ layoutType }: any) => {
             </span>
           </Link>
         </div>
-
         <React.Fragment>
           <SimpleBar id="scrollbar" className="h-100">
             <Container fluid>
