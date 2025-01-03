@@ -35,10 +35,10 @@ const AdminNavdata = () => {
       link: "/announcements-table",
     },
     {
-      id: "courses",
+      id: "ViewCourses",
       label: "Courses",
       icon: "las la-house-damage",
-      link: "/admin-courses",
+      link: "/ViewCourses",
     },
     {
       id: "messages",
@@ -78,7 +78,7 @@ const TrainerNavdata = () => {
     },
     {
       id: "trainer-courses-list",
-      label: "Courses",
+      label: "My Courses",
       icon: "las la-house-damage",
       link: "/trainer-courses-list",
     },
@@ -94,6 +94,14 @@ const TrainerNavdata = () => {
       icon: "las la-house-damage",
       link: "/adminreports",
     },
+
+    {
+      id: "messages",
+      label: "Messages",
+      icon: "las la-envelope",
+      link: "/messages",
+    },
+
     {
       label: "More",
       isHeader: true,
@@ -125,10 +133,24 @@ const TraineeNavdata = () => {
       isHeader: true,
     },
     {
-      id: "trainer-courses-list",
-      label: "Courses",
+      id: "all-courses",
+      label: "All Courses",
+      icon: "las la-th-list",
+      link: "/all-courses",
+    },
+
+    {
+      id: "trainee-courses-list",
+      label: "My Courses",
       icon: "las la-house-damage",
-      link: "/trainer-courses-list",
+      link: "/trainee-courses-list",
+    },
+
+    {
+      id: "messages",
+      label: "Messages",
+      icon: "las la-envelope",
+      link: "/messages",
     },
     {
       id: "payment",

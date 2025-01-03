@@ -77,7 +77,7 @@ const Payment = () => {
                   <h4 className="mt-4">Important Notes:</h4>
                   <ul>
                     <li>
-                      Ensure that the payment details are correct before completing the transaction.
+                      Please make sure that the payment details are correct before completing the transaction.
                     </li>
                     <li>
                       After making the payment, please provide proof of payment (e.g., a screenshot or transaction ID) to the training center administration for verification.

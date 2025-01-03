@@ -1,65 +1,248 @@
 import React, { useEffect, useState } from "react";
 import { Table, Card, Button, Container, Row, Col, Form } from "react-bootstrap";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "../../App"; // Adjust path to your Firebase setup
-import { getAuth } from "firebase/auth"; // Import Firebase Auth for the user info
+import { collection, getDocs, query, where, doc, getDoc } from "firebase/firestore";
+import { db } from "../../App";
+import { getAuth } from "firebase/auth";
 import moment from "moment";
 
 const ReportsPage = () => {
   const [reports, setReports] = useState<any[]>([]);
-  const [filteredReports, setFilteredReports] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [filterType, setFilterType] = useState<string>("all");
+  const [selectedReport, setSelectedReport] = useState<string>("trainers");
 
   const auth = getAuth();
   const currentUser = JSON.parse(sessionStorage.getItem("user_details") || "{}");
 
-  // Load reports based on user role
-  const loadReports = async () => {
+  const fetchReports = async (reportType: string) => {
     try {
       setIsLoading(true);
-      let reportsQuery;
 
-      if (currentUser.role === "admin") {
-        reportsQuery = collection(db, "Reports");
-      } else if (currentUser.role === "trainer") {
-        reportsQuery = query(
-          collection(db, "Reports"),
-          where("createdBy.uid", "==", currentUser.uid)
+      let querySnapshot;
+      if (reportType === "trainers") {
+        const trainersQuery = query(collection(db, "users"), where("role", "==", "trainer"));
+        querySnapshot = await getDocs(trainersQuery);
+
+        const trainersData = await Promise.all(
+          querySnapshot.docs.map(async (trainerDoc) => {
+            const trainerCoursesQuery = query(
+              collection(db, "courses"),
+              where("trainer_id", "==", trainerDoc.id)
+            );
+            const trainerCoursesSnapshot = await getDocs(trainerCoursesQuery);
+
+            const currentCourses = trainerCoursesSnapshot.docs.filter(
+              (courseDoc) => courseDoc.data().status === "Active"
+            ).length;
+            const completedCourses = trainerCoursesSnapshot.docs.filter(
+              (courseDoc) => courseDoc.data().status === "Completed"
+            ).length;
+
+            return {
+              username: trainerDoc.data().username || "Unknown",
+              email: trainerDoc.data().email || "N/A",
+              createdDtm: trainerDoc.data().createdDtm
+                ? moment(trainerDoc.data().createdDtm.toDate()).format("MMMM Do YYYY")
+                : "N/A",
+              currentCourses,
+              completedCourses,
+            };
+          })
         );
-      } else {
-        throw new Error("Invalid user role");
+
+        setReports(trainersData);
+      } else if (reportType === "trainees") {
+        const traineesQuery = query(collection(db, "users"), where("role", "==", "trainee"));
+        querySnapshot = await getDocs(traineesQuery);
+
+        const traineesData = await Promise.all(
+          querySnapshot.docs.map(async (traineeDoc) => {
+            const enrolledCourses = traineeDoc.data().enrolledCourses?.length || 0;
+            const completedCourses = traineeDoc.data().completedCourses?.length || 0;
+
+            return {
+              username: traineeDoc.data().username || "Unknown",
+              email: traineeDoc.data().email || "N/A",
+              createdDtm: traineeDoc.data().createdDtm
+                ? moment(traineeDoc.data().createdDtm.toDate()).format("MMMM Do YYYY")
+                : "N/A",
+              enrolledCourses,
+              completedCourses,
+            };
+          })
+        );
+
+        setReports(traineesData);
+      } else if (reportType === "courses") {
+        querySnapshot = await getDocs(collection(db, "courses"));
+
+        const coursesData = await Promise.all(
+          querySnapshot.docs.map(async (courseDoc) => {
+            const trainerDoc = await getDoc(doc(db, "users", courseDoc.data().trainer_id));
+            const trainerName = trainerDoc.exists()
+              ? trainerDoc.data()?.username || trainerDoc.data()?.email || "N/A"
+              : "N/A";
+
+            return {
+              title: courseDoc.data().title || "Unknown",
+              trainerName,
+              enrolledTrainees: courseDoc.data().students?.length || 0,
+              status: courseDoc.data().status || "N/A",
+              startDate: courseDoc.data().startDate || "N/A",
+              endDate: courseDoc.data().endDate || "N/A",
+            };
+          })
+        );
+
+        setReports(coursesData);
       }
-
-      const querySnapshot = await getDocs(reportsQuery);
-      const fetchedReports = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      setReports(fetchedReports);
-      setFilteredReports(fetchedReports); // Initially, show all reports
     } catch (error) {
-      console.error("Error loading reports:", error);
-      alert("Failed to load reports. Please check the console for details.");
+      console.error(`Error fetching ${reportType} report:`, error);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    loadReports();
-  }, []);
+    fetchReports(selectedReport);
+  }, [selectedReport]);
 
-  // Handle filter changes
-  const handleFilterChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedFilter = event.target.value;
-    setFilterType(selectedFilter);
+  const handleReportChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedReport(event.target.value);
+  };
 
-    if (selectedFilter === "all") {
-      setFilteredReports(reports);
-    } else {
-      setFilteredReports(reports.filter((report) => report.type === selectedFilter));
+  const printTable = () => {
+    const printContent = document.getElementById("report-table")?.outerHTML || "";
+    const newWindow = window.open("", "_blank");
+    newWindow?.document.write(`
+      <html>
+        <head>
+          <title>Print Report</title>
+          <style>
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid black; padding: 8px; text-align: left; }
+            .header { text-align: center; font-size: 24px; margin-bottom: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <strong>Academic Training Center</strong><br/>
+            Report Generated By: ${currentUser.username || "Unknown"}<br/>
+            Date: ${moment().format("MMMM Do YYYY, h:mm a")}
+          </div>
+          ${printContent}
+        </body>
+      </html>
+    `);
+    newWindow?.document.close();
+    newWindow?.print();
+  };
+
+  const renderTable = () => {
+    if (selectedReport === "trainers") {
+      return (
+        <Table responsive bordered hover id="report-table">
+          <thead>
+            <tr>
+              <th>Trainer Name</th>
+              <th>Email</th>
+              <th>Date Joined</th>
+              <th>Number of Current Courses</th>
+              <th>Number of Completed Courses</th>
+            </tr>
+          </thead>
+          <tbody>
+            {reports.length > 0 ? (
+              reports.map((report, index) => (
+                <tr key={index}>
+                  <td>{report.username}</td>
+                  <td>{report.email}</td>
+                  <td>{report.createdDtm}</td>
+                  <td>{report.currentCourses}</td>
+                  <td>{report.completedCourses}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={5} className="text-center">
+                  No Trainers Found
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </Table>
+      );
+    }
+
+    if (selectedReport === "trainees") {
+      return (
+        <Table responsive bordered hover id="report-table">
+          <thead>
+            <tr>
+              <th>Trainee Name</th>
+              <th>Email</th>
+              <th>Date Joined</th>
+              <th>Number of Enrolled Courses</th>
+              <th>Number of Completed Courses</th>
+            </tr>
+          </thead>
+          <tbody>
+            {reports.length > 0 ? (
+              reports.map((report, index) => (
+                <tr key={index}>
+                  <td>{report.username}</td>
+                  <td>{report.email}</td>
+                  <td>{report.createdDtm}</td>
+                  <td>{report.enrolledCourses}</td>
+                  <td>{report.completedCourses}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={5} className="text-center">
+                  No Trainees Found
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </Table>
+      );
+    }
+
+    if (selectedReport === "courses") {
+      return (
+        <Table responsive bordered hover id="report-table">
+          <thead>
+            <tr>
+              <th>Course Title</th>
+              <th>Trainer Name</th>
+              <th>Number of Enrolled Trainees</th>
+              <th>Status</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {reports.length > 0 ? (
+              reports.map((report, index) => (
+                <tr key={index}>
+                  <td>{report.title}</td>
+                  <td>{report.trainerName}</td>
+                  <td>{report.enrolledTrainees}</td>
+                  <td>{report.status}</td>
+                  <td>{report.startDate}</td>
+                  <td>{report.endDate}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={6} className="text-center">
+                  No Courses Found
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </Table>
+      );
     }
   };
 
@@ -71,78 +254,24 @@ const ReportsPage = () => {
           <Row className="mb-4">
             <Col md={6}>
               <Form.Group>
-                <Form.Label>Filter by Report Type</Form.Label>
-                <Form.Select value={filterType} onChange={handleFilterChange}>
-                  <option value="all">All Reports</option>
-                  <option value="course-performance">Course Performance</option>
-                  <option value="trainee-progress">Trainee Progress</option>
-                  <option value="trainer-activity">Trainer Activity</option>
-                  <option value="assignment-submission">Assignment Submission</option>
-                  <option value="feedback">Feedback</option>
-                  <option value="enrollment">Enrollment</option>
-                  <option value="attendance">Attendance</option>
-                  <option value="certification">Certification</option>
-                  <option value="financial">Financial</option>
+                <Form.Label>Select Report Type</Form.Label>
+                <Form.Select value={selectedReport} onChange={handleReportChange}>
+                  <option value="trainers">Trainers List</option>
+                  <option value="trainees">Trainees List</option>
+                  <option value="courses">Courses List</option>
                 </Form.Select>
               </Form.Group>
             </Col>
-            {/* <Col className="text-end">
-              <Button variant="primary">Add New Report</Button>
-            </Col> */}
+            <Col md={6} className="text-end">
+              <Button variant="success" onClick={printTable}>
+                Print Report
+              </Button>
+            </Col>
           </Row>
           <Row>
             <Col xl={12}>
               <Card>
-                <Card.Body>
-                  {isLoading ? (
-                    <p>Loading...</p>
-                  ) : (
-                    <Table responsive bordered hover>
-                      <thead>
-                        <tr>
-                          <th>Title</th>
-                          <th>Type</th>
-                          <th>Created On</th>
-                          <th>Created By</th>
-                          <th>Description</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredReports.length > 0 ? (
-                          filteredReports.map((report) => (
-                            <tr key={report.id}>
-                              <td>{report.title}</td>
-                              <td>{report.type}</td>
-                              <td>
-                                {report.createdOn
-                                  ? moment(report.createdOn.toDate()).format(
-                                      "MMMM Do YYYY, h:mm a"
-                                    )
-                                  : "N/A"}
-                              </td>
-                              <td>
-                                {report.createdBy && typeof report.createdBy === "object"
-                                  ? report.createdBy.displayName || report.createdBy.email
-                                  : "Unknown User"}
-                              </td>
-                              <td>
-                                {report.description.length > 50
-                                  ? `${report.description.slice(0, 50)}...`
-                                  : report.description}
-                              </td>
-                            </tr>
-                          ))
-                        ) : (
-                          <tr>
-                            <td colSpan={5} className="text-center">
-                              No Reports Found
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </Table>
-                  )}
-                </Card.Body>
+                <Card.Body>{isLoading ? <p>Loading...</p> : renderTable()}</Card.Body>
               </Card>
             </Col>
           </Row>
