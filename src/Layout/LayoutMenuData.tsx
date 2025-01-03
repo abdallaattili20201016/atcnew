@@ -46,16 +46,16 @@ const AdminNavdata = () => {
       icon: "las la-envelope",
       link: "/messages",
     },
-    {
-      label: "More",
-      isHeader: true,
-    },
-    {
-      id: "aboutus",
-      label: "About Us",
-      icon: "las la-house-damage",
-      link: "/aboutus",
-    },
+    // {
+    //   label: "More",
+    //   isHeader: true,
+    // },
+    // {
+    //   id: "aboutus",
+    //   label: "About Us",
+    //   icon: "las la-house-damage",
+    //   link: "/aboutus",
+    // },
   ];
   return <React.Fragment>{menuItems}</React.Fragment>;
 };
@@ -102,16 +102,16 @@ const TrainerNavdata = () => {
       link: "/messages",
     },
 
-    {
-      label: "More",
-      isHeader: true,
-    },
-    {
-      id: "aboutus",
-      label: "About Us",
-      icon: "las la-house-damage",
-      link: "/aboutus",
-    },
+    // {
+    //   label: "More",
+    //   isHeader: true,
+    // },
+    // {
+    //   id: "aboutus",
+    //   label: "About Us",
+    //   icon: "las la-house-damage",
+    //   link: "/aboutus",
+    // },
   ];
   return <React.Fragment>{menuItems}</React.Fragment>;
 };
