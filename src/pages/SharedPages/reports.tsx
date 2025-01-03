@@ -6,6 +6,7 @@ import { getAuth } from "firebase/auth";
 import moment from "moment";
 
 const ReportsPage = () => {
+  document.title = "Reports";
   const [reports, setReports] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedReport, setSelectedReport] = useState<string>("trainers");

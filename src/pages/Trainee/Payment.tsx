@@ -7,7 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { toast } from "react-toastify";
 
 const Payment = () => {
-  document.title = "Payment | Trainee Dashboard";
+  document.title = "Payment Instructions";
 
   const [payments, setPayments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);

@@ -4,6 +4,7 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/firestore";
 
 const AdminAuditLogPage = () => {
+  
   const [logs, setLogs] = useState<any[]>([]);
 
   useEffect(() => {

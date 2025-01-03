@@ -8,6 +8,7 @@ import { toast, Slide, ToastContainer } from "react-toastify";
 import { getAuth, sendPasswordResetEmail } from "firebase/auth";
 
 const ForgotPassword = (props: any) => {
+  document.title = "Forgot Password";
   const validation = useFormik({
     enableReinitialize: true,
     initialValues: {

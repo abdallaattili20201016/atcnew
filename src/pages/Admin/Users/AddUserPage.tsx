@@ -18,6 +18,7 @@ import { toast, Slide, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const AddUserPage: React.FC = () => {
+  document.title = "Add User";
   const navigate = useNavigate();
   const firebaseBackend = getFirebaseBackend();
   const [loader, setLoader] = useState<boolean>(false);

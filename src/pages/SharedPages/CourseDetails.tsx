@@ -17,6 +17,7 @@ interface Course {
 }
 
 const CourseDetails = () => {
+  document.title = "Course Details";
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [course, setCourse] = useState<Course | null>(null);

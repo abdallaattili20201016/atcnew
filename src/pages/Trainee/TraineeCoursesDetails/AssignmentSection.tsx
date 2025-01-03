@@ -19,6 +19,7 @@ const AssignmentSection = ({
   course_id: any;
   loadData: any;
 }) => {
+  document.title = "Assignments";
   const firebaseBackend = getFirebaseBackend();
 
   // State for modal visibility and edit data

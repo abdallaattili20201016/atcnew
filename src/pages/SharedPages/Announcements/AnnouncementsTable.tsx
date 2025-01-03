@@ -6,6 +6,9 @@ import { db } from "../../../App"; // Adjust path to your Firebase setup
 import moment from "moment";
 
 const AnnouncementsTable = () => {
+  document.title = "Announcements";
+
+
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const navigate = useNavigate();

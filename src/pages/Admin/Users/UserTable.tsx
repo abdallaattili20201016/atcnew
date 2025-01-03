@@ -21,6 +21,7 @@ interface userProps {
 }
 
 const UserTable = ({ isShow, hideUserModal }: userProps) => {
+  document.title = "Users";
   const navigate = useNavigate();
   const [users, setUsers] = useState<any>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);

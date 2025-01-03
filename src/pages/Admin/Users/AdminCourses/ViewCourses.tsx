@@ -25,6 +25,9 @@ import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 
 const ViewCourses: React.FC = () => {
+  document.title = "Courses";
+
+
   const navigate = useNavigate();
   const [courses, setCourses] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
