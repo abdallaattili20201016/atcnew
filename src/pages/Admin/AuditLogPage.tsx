@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { getDocs, collection, query, orderBy, Timestamp } from "firebase/firestore";
 import { db } from "../../helpers/config"; // Ensure db is correctly imported
 import { fetchUserNameById as loadUserName } from "../../helpers/firebase_helper";
+import { Container } from "react-bootstrap";
 
 const AuditLogPage: React.FC = () => {
   const [logs, setLogs] = useState<any[]>([]);
@@ -160,10 +161,13 @@ const AuditLogPage: React.FC = () => {
   }
 
   return (
-    <div className="container mt-5">
+    <React.Fragment>
+    <div className="page-content">
+    <Container fluid>
+    <h2 className="my-4">Audit Logs</h2>
       <div className="card shadow-sm">
         <div className="card-header bg-primary text-white">
-          <h1 className="h4 mb-0">Audit Logs</h1>
+          
         </div>
         <div className="card-body">
           <div className="mb-3">
@@ -261,7 +265,9 @@ const AuditLogPage: React.FC = () => {
           )}
         </div>
       </div>
+      </Container>
     </div>
+    </React.Fragment>
   );
 };
 
