@@ -1,74 +1,39 @@
-import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Card, Table } from "react-bootstrap";
-import { db } from "../../helpers/config";
-import { collection, query, where, getDocs, orderBy, limit } from "firebase/firestore";
-import { useAuth } from "../../helpers/auth_context"; // Assuming you have an AuthContext for the current user
+import React, { useEffect, useState } from "react";
+import { Container, Row, Col, Card, Table, Spinner } from "react-bootstrap";
+import { getFirebaseBackend } from "../../helpers/firebase_helper";
 
 const TraineeDashboard = () => {
-  const [courses, setCourses] = useState<{ title: string; start: string; end: string }[]>([]);
-  const [announcements, setAnnouncements] = useState<{ title: string; description: string }[]>([]);
-  const [completedAssignments, setCompletedAssignments] = useState(0);
-
-  const { currentUser } = useAuth(); // Get the current trainee's info
+  const [courses, setCourses] = useState<any[]>([]);
+  const [assignmentsCompleted, setAssignmentsCompleted] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const firebaseBackend = getFirebaseBackend();
 
   useEffect(() => {
-    const fetchTraineeData = async () => {
+    const loadDashboardData = async () => {
       try {
-        if (!currentUser) return;
+        setIsLoading(true);
 
-        // Fetch enrolled courses
-        const coursesQuery = query(
-          collection(db, "courses"),
-          where("students", "array-contains", currentUser.uid)
-        );
-        const coursesSnapshot = await getDocs(coursesQuery);
-        const courseData = coursesSnapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            title: data.title,
-            start: data.start.toDate().toLocaleDateString(),
-            end: data.end.toDate().toLocaleDateString(),
-          };
-        });
-        setCourses(courseData);
+        // Fetch trainee courses
+        const dataList = await firebaseBackend.getTraineeCourses();
+        setCourses(dataList);
 
-        // Fetch completed assignments (from course documents)
-        let totalCompletedAssignments = 0;
-        coursesSnapshot.docs.forEach((doc) => {
-          const data = doc.data();
-          if (data.submits) {
-            const completed = data.submits.filter(
-              (submit: { studentId: string; completed: boolean }) =>
-                submit.studentId === currentUser.uid && submit.completed
-            );
-            totalCompletedAssignments += completed.length;
+        // Calculate completed assignments (mock data for now)
+        let completedAssignments = 0;
+        dataList.forEach((course: any) => {
+          if (course.completedAssignments) {
+            completedAssignments += course.completedAssignments;
           }
         });
-        setCompletedAssignments(totalCompletedAssignments);
-
-        // Fetch recent announcements
-        const announcementsQuery = query(
-          collection(db, "Announcements"),
-          where("status", "==", "active"),
-          orderBy("createdOn", "desc"),
-          limit(5)
-        );
-        const announcementsSnapshot = await getDocs(announcementsQuery);
-        const announcementsData = announcementsSnapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            title: data.title,
-            description: data.description,
-          };
-        });
-        setAnnouncements(announcementsData);
+        setAssignmentsCompleted(completedAssignments);
       } catch (error) {
-        console.error("Error fetching trainee data:", error);
+        console.error("Error loading trainee dashboard data:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchTraineeData();
-  }, [currentUser]);
+    loadDashboardData();
+  }, []);
 
   return (
     <div className="page-content">
@@ -82,7 +47,7 @@ const TraineeDashboard = () => {
               <Card.Body>
                 <i className="las la-book fs-40 text-primary"></i>
                 <h5 className="mt-3">Courses Enrolled</h5>
-                <h2 className="mb-0">{courses.length}</h2>
+                <h2 className="mb-0">{isLoading ? "Loading..." : courses.length}</h2>
               </Card.Body>
             </Card>
           </Col>
@@ -91,7 +56,7 @@ const TraineeDashboard = () => {
               <Card.Body>
                 <i className="las la-check-circle fs-40 text-success"></i>
                 <h5 className="mt-3">Assignments Completed</h5>
-                <h2 className="mb-0">{completedAssignments}</h2>
+                <h2 className="mb-0">{isLoading ? "Loading..." : assignmentsCompleted}</h2>
               </Card.Body>
             </Card>
           </Col>
@@ -103,30 +68,39 @@ const TraineeDashboard = () => {
             <Card>
               <Card.Body>
                 <h4 className="card-title">Enrolled Courses</h4>
-                <Table striped bordered hover responsive>
-                  <thead>
-                    <tr>
-                      <th>Course Title</th>
-                      <th>Start Date</th>
-                      <th>End Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {courses.length > 0 ? (
-                      courses.map((course, index) => (
+                {isLoading ? (
+                  <Spinner animation="grow" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </Spinner>
+                ) : courses && courses.length > 0 ? (
+                  <Table striped bordered hover responsive>
+                    <thead>
+                      <tr>
+                        <th>Course Title</th>
+                        <th>Description</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {courses.map((course: any, index: number) => (
                         <tr key={index}>
                           <td>{course.title}</td>
-                          <td>{course.start}</td>
-                          <td>{course.end}</td>
+                          <td>{course.description}</td>
+                          <td>
+                            <a
+                              href={`/trainee-courses-details/${course.id}`}
+                              className="btn btn-primary"
+                            >
+                              View Details
+                            </a>
+                          </td>
                         </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={3}>No courses enrolled</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </Table>
+                      ))}
+                    </tbody>
+                  </Table>
+                ) : (
+                  <p>No courses enrolled</p>
+                )}
               </Card.Body>
             </Card>
           </Col>
@@ -138,17 +112,7 @@ const TraineeDashboard = () => {
             <Card>
               <Card.Body>
                 <h4 className="card-title">Recent Announcements</h4>
-                <ul className="list-group">
-                  {announcements.length > 0 ? (
-                    announcements.map((announcement, index) => (
-                      <li className="list-group-item" key={index}>
-                        <strong>{announcement.title}</strong>: {announcement.description}
-                      </li>
-                    ))
-                  ) : (
-                    <li className="list-group-item">No announcements available</li>
-                  )}
-                </ul>
+                <p>No announcements available</p> {/* Replace this with dynamic announcements if needed */}
               </Card.Body>
             </Card>
           </Col>
