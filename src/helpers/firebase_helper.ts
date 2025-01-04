@@ -62,8 +62,9 @@ class FirebaseAuthBackend {
         .auth()
         .createUserWithEmailAndPassword(email, password) // Create a new user with the provided email and password
         .then(
-          (user: any) => {
+          async (user: any) => {
             // On successful creation, resolve the promise with the current authenticated user
+            await logEvent("RegisterUser", { email, userId: this.uuid }, {}, this.uuid || "");
             resolve(firebase.auth().currentUser);
           },
           (error: any) => {
@@ -83,7 +84,8 @@ class FirebaseAuthBackend {
         .auth()
         .createUserWithEmailAndPassword(email, password)
         .then(
-          (user: any) => {
+          async (user: any) => {
+            await logEvent("EditProfile", { email, userId: this.uuid }, {}, this.uuid || "");
             resolve(firebase.auth().currentUser);
           },
           (error: any) => {
@@ -104,8 +106,9 @@ class FirebaseAuthBackend {
         .auth()
         .signInWithEmailAndPassword(email, password) // Attempt to sign in the user with provided email and password
         .then(
-          (user: any) => {
+          async (user: any) => {
             // On successful login, resolve the promise with the current authenticated user
+            await logEvent("LoginUser", { email }, {}, this.uuid || "");
             resolve(firebase.auth().currentUser);
           },
           (error: any) => {
@@ -127,7 +130,8 @@ class FirebaseAuthBackend {
           url:
             window.location.protocol + "//" + window.location.host + "/login",
         })
-        .then(() => {
+        .then(async () => {
+          await logEvent("ForgetPassword", { email }, {}, this.uuid || "");
           resolve(true);
         })
         .catch((error: any) => {
@@ -144,8 +148,9 @@ class FirebaseAuthBackend {
       firebase
         .auth()
         .signOut()
-        .then(() => {
+        .then(async () => {
           this.uuid = undefined; // Clear the stored user ID
+          await logEvent("LogoutUser", {}, {}, this.uuid || "");
           resolve(true);
         })
         .catch((error: any) => {
@@ -189,6 +194,7 @@ class FirebaseAuthBackend {
 
       // Update the user's document with the new data
       await userRef.update(updatedData);
+      await logEvent("UpdateUserDetails", updatedData, {}, this.uuid || "");
       console.log("User updated successfully");
     } catch (error) {
       console.error("Error updating user:", error);
@@ -319,20 +325,7 @@ class FirebaseAuthBackend {
   /**
    * Deletes a user from Firestore.
    */
-  deleteUser = async (userId: string) => {
-    try {
-      console.log(`Attempting to delete user with ID: ${userId}`);
-      const userDoc = this.firestore.collection("users").doc(userId);
-      const originalData = (await userDoc.get()).data();
-      await userDoc.delete();
-      console.log(`User with ID: ${userId} deleted successfully`);
-
-      await logEvent("DeleteUser", {}, originalData, this.uuid || "");
-    } catch (error) {
-      console.error("Error deleting user:", error);
-      throw error;
-    }
-  };
+  // Removed duplicate deleteUser function in the class
 
   //end attili
 
@@ -405,6 +398,7 @@ class FirebaseAuthBackend {
         : [...students, this.uuid]; // Add the user
 
       await courseRef.update({ students: updatedStudents });
+      await logEvent("EnrollCourse", { courseId }, {}, this.uuid || "");
     } catch (error) {
       console.error("Error handling course enrollment:", error);
       throw error;
@@ -863,7 +857,6 @@ class FirebaseAuthBackend {
 
 
 
-
   //////////////// end 2 attili
 
   getAuthenticatedUser = () => {
@@ -1057,6 +1050,31 @@ export const logEvent = async (
     });
   } catch (error) {
     console.error("Error logging event:", error);
+  }
+};
+
+export const deleteUser = async (userId: string) => {
+  try {
+    const userRef = doc(db, "users", userId);
+
+    // Fetch the original user data before deletion
+    const userSnapshot = await getDoc(userRef);
+    if (!userSnapshot.exists) {
+      console.error("User not found!");
+      return;
+    }
+    const originalData = userSnapshot.data();
+
+    // Delete the user document
+    await deleteDoc(userRef);
+
+    // Log the deletion event with original data
+    await logEvent("DeleteUser", {}, originalData, userId);
+
+    console.log("User deleted successfully");
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    throw error;
   }
 };
 
