@@ -19,26 +19,20 @@ const AdminNavdata = () => {
     {
       id: "users",
       label: "Users",
-      icon: "las la-house-damage",
+      icon: "bi bi-people",
       link: "/users",
-    },
-    {
-      id: "reports",
-      label: "Reports",
-      icon: "las la-house-damage",
-      link: "/adminreports",
-    },
-    {
-      id: "announcements",
-      label: "Announcements",
-      icon: "las la-house-damage",
-      link: "/announcements-table",
     },
     {
       id: "ViewCourses",
       label: "Courses",
-      icon: "las la-house-damage",
+      icon: "las la-th-list",
       link: "/ViewCourses",
+    },
+    {
+      id: "announcements",
+      label: "Announcements",
+      icon: "bi bi-megaphone",
+      link: "/announcements-table",
     },
     {
       id: "messages",
@@ -46,6 +40,14 @@ const AdminNavdata = () => {
       icon: "las la-envelope",
       link: "/messages",
     },
+    {
+      id: "reports",
+      label: "Reports",
+      icon: "bi bi-printer",
+      link: "/adminreports",
+    },
+
+
     // {
     //   label: "More",
     //   isHeader: true,
@@ -79,28 +81,29 @@ const TrainerNavdata = () => {
     {
       id: "trainer-courses-list",
       label: "My Courses",
-      icon: "las la-house-damage",
+      icon: "las la-th-list",
       link: "/trainer-courses-list",
     },
     {
       id: "TrainerAnnouncements",
       label: "Announcements",
-      icon: "las la-house-damage",
+      icon: "bi bi-megaphone",
       link: "/announcements-table",
     },
-    {
-      id: "TrainerReports",
-      label: "Reports",
-      icon: "las la-house-damage",
-      link: "/adminreports",
-    },
-
     {
       id: "messages",
       label: "Messages",
       icon: "las la-envelope",
       link: "/messages",
     },
+    {
+      id: "TrainerReports",
+      label: "Reports",
+      icon: "bi bi-printer",
+      link: "/adminreports",
+    },
+
+
 
     // {
     //   label: "More",
@@ -152,11 +155,25 @@ const TraineeNavdata = () => {
       icon: "las la-envelope",
       link: "/messages",
     },
+
+    {
+      id: "TrainerAnnouncements",
+      label: "Announcements",
+      icon: "bi bi-megaphone",
+      link: "/announcements-table",
+    },
+
     {
       id: "payment",
       label: "Payment",
-      icon: "las la-house-damage",
+      icon: "bi bi-credit-card",
       link: "/payment",
+    },
+    {
+      id: "certificates",
+      label: "certificates",
+      icon: "bi bi-patch-check",
+      link: "/certificates",
     },
     {
       label: "More",
@@ -165,7 +182,7 @@ const TraineeNavdata = () => {
     {
       id: "aboutus",
       label: "About Us",
-      icon: "las la-house-damage",
+      icon: "bi bi-info-circle",
       link: "/aboutus",
     },
   ];
