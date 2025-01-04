@@ -55,6 +55,13 @@ const AdminNavdata = () => {
       link: "/adminreports",
     },
 
+    {
+      id: "EnrollmentRequests",
+      label: "Enrollment Requests",
+      icon: "las la-th-list",
+      link: "/enrollment-requests",
+    },
+
 
     // {
     //   label: "More",

@@ -28,6 +28,7 @@ import ViewCourses from "../pages/Admin/Users/AdminCourses/ViewCourses";
 import AddCourses from "../pages/Admin/Users/AdminCourses/AddCourses";
 import Certificates from "../pages/Trainee/Certificates";
 import AuditLogPage from "../pages/Admin/AuditLogPage";
+import EnrollmentRequests from "../pages/Admin/Users/AdminCourses/EnrollmentRequests";
 
 
 const auth = getAuth(); // Get the authenticated user
@@ -60,6 +61,7 @@ const authProtectedRoutes: Array<RouteObject> = [
   { path: "/add-user", component: <AddUserPage /> },
   // Admin Announcements
   { path: "/announcements-table", component: <AdminAnnouncementsTable /> },
+
   { path: "/admin-announcements/new", component: <CreateAnnouncement /> },
 
 
@@ -68,6 +70,8 @@ const authProtectedRoutes: Array<RouteObject> = [
   { path: "/audit-log", component: <AuditLogPage />},
 
   { path: "/courses/:id", component: <CourseDetails /> },
+
+  { path: "/enrollment-requests", component: <EnrollmentRequests /> },
 
   { path: "/payment", component: <Payment /> },
 
