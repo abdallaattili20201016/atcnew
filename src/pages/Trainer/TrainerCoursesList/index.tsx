@@ -87,7 +87,7 @@ const TrainerCoursesList = () => {
         Cell: (cell: any) => <>{cell.row.original.location}</>,
       },
       {
-        Header: "Exp Date",
+        Header: "End Date",
         accessor: "expiryDate",
         Filter: false,
         isSortable: true,

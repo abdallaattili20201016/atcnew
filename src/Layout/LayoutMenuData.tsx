@@ -145,7 +145,7 @@ const TraineeNavdata = () => {
     {
       id: "trainee-courses-list",
       label: "My Courses",
-      icon: "las la-house-damage",
+      icon: "bi bi-book",
       link: "/trainee-courses-list",
     },
 

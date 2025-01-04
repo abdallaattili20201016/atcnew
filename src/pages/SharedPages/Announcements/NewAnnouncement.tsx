@@ -19,18 +19,18 @@ const NewAnnouncement = () => {
   const validationSchema = Yup.object({
     title: Yup.string().required("Title is required"),
     description: Yup.string().required("Description is required"),
-    status: Yup.string().required("Please select a status"),
+    
   });
 
   const formik = useFormik({
     initialValues: {
       title: "",
       description: "",
-      status: "active",
+     
     },
     validationSchema,
     onSubmit: async (
-      values: { title: string; description: string; status: string },
+      values: { title: string; description: string },
       { resetForm }: { resetForm: () => void }
     ) => {
       try {
@@ -100,27 +100,6 @@ const NewAnnouncement = () => {
                           />
                           <Form.Control.Feedback type="invalid">
                             {formik.errors.description}
-                          </Form.Control.Feedback>
-                        </Form.Group>
-                      </Col>
-                    </Row>
-
-                    <Row className="mb-3">
-                      <Col md={6}>
-                        <Form.Group>
-                          <Form.Label>Status</Form.Label>
-                          <Form.Select
-                            name="status"
-                            value={formik.values.status}
-                            onChange={formik.handleChange}
-                            onBlur={formik.handleBlur}
-                            isInvalid={formik.touched.status && !!formik.errors.status}
-                          >
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                          </Form.Select>
-                          <Form.Control.Feedback type="invalid">
-                            {formik.errors.status}
                           </Form.Control.Feedback>
                         </Form.Group>
                       </Col>

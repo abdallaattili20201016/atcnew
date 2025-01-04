@@ -63,7 +63,7 @@ const AnnouncementsTable = () => {
           <h2 className="my-4">Announcements</h2>
           <Row className="mb-4">
             <Col className="text-end">
-              {isTrainer && (
+              {(isAdmin || isTrainer) && (
                 <Button
                   variant="primary"
                   onClick={() => navigate("/admin-announcements/new")}
@@ -86,8 +86,7 @@ const AnnouncementsTable = () => {
                           <th>Title</th>
                           <th>Description</th>
                           <th>Created By</th>
-                          <th>Created On</th>
-                          <th>Status</th>
+                          <th>Date</th>
                           <th>Actions</th>
                         </tr>
                       </thead>
@@ -113,17 +112,7 @@ const AnnouncementsTable = () => {
                                     )
                                   : "N/A"}
                               </td>
-                              <td>
-                                <span
-                                  className={`badge ${
-                                    announcement.status === "active"
-                                      ? "bg-success-subtle text-success"
-                                      : "bg-danger-subtle text-danger"
-                                  }`}
-                                >
-                                  {announcement.status}
-                                </span>
-                              </td>
+
                               <td>
                                 <ul className="list-inline hstack gap-2 mb-0">
                                   <li
