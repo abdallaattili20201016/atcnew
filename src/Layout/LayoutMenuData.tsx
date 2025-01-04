@@ -46,6 +46,14 @@ const AdminNavdata = () => {
       icon: "las la-envelope",
       link: "/messages",
     },
+
+    {
+      id: "auditLog",
+      label: "Audit Log",
+      icon: "las la-house-damage",
+      link: "/audit-log",
+    },
+
     // {
     //   label: "More",
     //   isHeader: true,

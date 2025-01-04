@@ -26,6 +26,7 @@ import AssignmentSubmitList from "../pages/Trainer/AssignmentSubmitList";
 import TrainerCoursesDetails from "../pages/Trainer/TrainerCoursesDetails";
 import ViewCourses from "../pages/Admin/Users/AdminCourses/ViewCourses";
 import AddCourses from "../pages/Admin/Users/AdminCourses/AddCourses";
+import AuditLogPage from "../pages/Admin/AuditLogPage";
 
 
 const auth = getAuth(); // Get the authenticated user
@@ -43,7 +44,6 @@ const authProtectedRoutes: Array<RouteObject> = [
   { path: "/dashboard", component: <Dashboard /> },
   { path: "/", exact: true, component: <Navigate to="/login" /> },
   { path: "*", component: <Navigate to="/login" /> },
-
 
   { path: "/users", component: <Users /> },
 
@@ -63,6 +63,8 @@ const authProtectedRoutes: Array<RouteObject> = [
 
 
   { path: "/messages", component: <MessagesPageWithAuth /> },
+
+  { path: "/audit-log", component: <AuditLogPage />},
 
   { path: "/courses/:id", component: <CourseDetails /> },
 

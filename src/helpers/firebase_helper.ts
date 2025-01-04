@@ -209,6 +209,8 @@ class FirebaseAuthBackend {
         return;
       }
 
+      const originalData = docSnapshot.data();
+
       await userRef.update({
         username: updatedData.memberName,
         email: updatedData.email,
@@ -216,6 +218,8 @@ class FirebaseAuthBackend {
         status: updatedData.status,
         picture: updatedData.memberImage,
       });
+
+      await logEvent("UpdateUser", updatedData, originalData, this.uuid || "");
 
       console.log("User updated successfully");
     } catch (error: any) {
@@ -250,6 +254,8 @@ class FirebaseAuthBackend {
 
     // Save the user details to Firestore under the current user ID
     await collection.doc(firebase.auth().currentUser?.uid).set(details);
+
+    await logEvent("AddUser", details, {}, this.uuid || "");
 
     // Return the user and details object
     return { user, details };
@@ -317,8 +323,11 @@ class FirebaseAuthBackend {
     try {
       console.log(`Attempting to delete user with ID: ${userId}`);
       const userDoc = this.firestore.collection("users").doc(userId);
+      const originalData = (await userDoc.get()).data();
       await userDoc.delete();
       console.log(`User with ID: ${userId} deleted successfully`);
+
+      await logEvent("DeleteUser", {}, originalData, this.uuid || "");
     } catch (error) {
       console.error("Error deleting user:", error);
       throw error;
@@ -545,6 +554,8 @@ class FirebaseAuthBackend {
           updatedDtm: firebase.firestore.FieldValue.serverTimestamp(),
         });
 
+        await logEvent("EditAssignment", newAssignment, courseData, this.uuid || "");
+
         console.log("Assignment updated successfully");
         return newAssignment;
       } else {
@@ -562,6 +573,8 @@ class FirebaseAuthBackend {
         await courseRef.update({
           assignments: assignments,
         });
+
+        await logEvent("AddAssignment", newAssignmentData, {}, this.uuid || "");
 
         console.log("Assignment added successfully");
         return newAssignmentData;
@@ -600,6 +613,8 @@ class FirebaseAuthBackend {
             assignments: assignments,
             updatedDtm: firebase.firestore.FieldValue.serverTimestamp(),
           });
+
+          await logEvent("DeleteAssignment", {}, courseData, this.uuid || "");
 
           console.log("Assignment deleted successfully");
         } else {
@@ -656,6 +671,8 @@ class FirebaseAuthBackend {
           updatedDtm: firebase.firestore.FieldValue.serverTimestamp(),
         });
 
+        await logEvent("EditDocument", newDocument, courseData, this.uuid || "");
+
         return newDocument;
       } else {
         documents.push(newDocument);
@@ -663,6 +680,8 @@ class FirebaseAuthBackend {
         await courseRef.update({
           documents: documents,
         });
+
+        await logEvent("AddDocument", newDocument, {}, this.uuid || "");
 
         return newDocument;
       }
@@ -695,6 +714,8 @@ class FirebaseAuthBackend {
             documents: documents,
             updatedDtm: firebase.firestore.FieldValue.serverTimestamp(),
           });
+
+          await logEvent("DeleteDocument", {}, courseData, this.uuid || "");
         } else {
           throw new Error("document not found");
         }
@@ -743,6 +764,8 @@ class FirebaseAuthBackend {
         assignments: assignments,
         updatedDtm: firebase.firestore.FieldValue.serverTimestamp(),
       });
+
+      await logEvent("SubmitAssignment", newObj, courseData, this.uuid || "");
     } catch (error) {
       throw error;
     }
@@ -774,6 +797,8 @@ class FirebaseAuthBackend {
           assignments: updatedAssignments,
           updatedDtm: firebase.firestore.FieldValue.serverTimestamp(),
         });
+
+        await logEvent("DeleteSubmission", {}, courseData, this.uuid || "");
       } else {
         throw new Error("Assignment not found");
       }
@@ -826,6 +851,8 @@ class FirebaseAuthBackend {
         assignments: assignments,
         updatedDtm: firebase.firestore.FieldValue.serverTimestamp(),
       });
+
+      await logEvent("MarkAssignment", { mark }, courseData, this.uuid || "");
     } catch (error) {
       throw error;
     }
@@ -997,9 +1024,9 @@ export const fetchUserNameById = async (userId: string): Promise<string> => {
   try {
     const userDoc = await getDoc(doc(db, "users", userId));
     if (userDoc.exists()) {
-      return userDoc.data().name || "Unknown"; // Adjust the field name if necessary
+      const data = userDoc.data();
+      return data.username || "Unknown";
     } else {
-      console.warn(`No user found with ID: ${userId}`);
       return "Unknown";
     }
   } catch (error) {
@@ -1011,12 +1038,21 @@ export const fetchUserNameById = async (userId: string): Promise<string> => {
 /**
  * Logs an event to the audit logs.
  */
-export const logEvent = async (action: string, details: any) => {
+export const logEvent = async (
+  action: string,
+  updates: any,
+  original: any,
+  userId: String
+) => {
   try {
     const db = firebase.firestore();
     await db.collection("auditLogs").add({
       action,
-      details,
+      details: {
+        updates,  // The new values
+        original, // The old values
+      },
+      userId,
       timestamp: firebase.firestore.FieldValue.serverTimestamp(),
     });
   } catch (error) {
