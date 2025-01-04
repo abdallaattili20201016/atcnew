@@ -44,7 +44,7 @@ const AdminNavdata = () => {
     {
       id: "auditLog",
       label: "Audit Log",
-      icon: "las la-house-damage",
+      icon: "bi bi-clock-history",
       link: "/audit-log",
     },
 
