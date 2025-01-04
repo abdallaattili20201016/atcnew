@@ -228,7 +228,7 @@ const AuditLogPage: React.FC = () => {
                   <tr>
                     <th scope="col">Action</th>
                     <th scope="col">Details</th>
-                    <th scope="col">User ID</th>
+                    <th scope="col">User</th>
                     <th scope="col">Timestamp</th>
                   </tr>
                 </thead>
