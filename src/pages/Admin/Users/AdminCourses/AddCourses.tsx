@@ -157,19 +157,20 @@ const AddCourses = () => {
                             <Spinner animation="border" size="sm" />
                           ) : (
                             <Form.Select
-                              name="trainer_id"
-                              value={formik.values.trainer_id}
-                              onChange={formik.handleChange}
-                              onBlur={formik.handleBlur}
-                              isInvalid={formik.touched.trainer_id && !!formik.errors.trainer_id}
-                            >
-                              <option value="">Select Trainer</option>
-                              {trainers.map((trainer) => (
-                                <option key={trainer.id} value={trainer.id}>
-                                  {trainer.displayName || trainer.email}
-                                </option>
-                              ))}
-                            </Form.Select>
+                            name="trainer_id"
+                            value={formik.values.trainer_id}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            isInvalid={formik.touched.trainer_id && !!formik.errors.trainer_id}
+                          >
+                            <option value="">Select Trainer</option>
+                            {trainers.map((trainer) => (
+                              <option key={trainer.id} value={trainer.id}>
+                                {trainer.displayName || trainer.email}
+                              </option>
+                            ))}
+                          </Form.Select>
+                          
                           )}
                           <Form.Control.Feedback type="invalid">
                             {formik.errors.trainer_id}

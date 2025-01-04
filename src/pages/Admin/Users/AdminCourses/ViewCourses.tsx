@@ -4,12 +4,14 @@ import {
   Col,
   Form,
   Row,
-  Button,
   Modal,
-  Spinner,
   Container,
+  Button,
+  ToastContainer,
+  Spinner,
 } from "react-bootstrap";
-import { ToastContainer, toast } from "react-toastify";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import {
   collection,
   getDocs,
@@ -22,11 +24,9 @@ import { db } from "../../../../App"; // Adjust the path to your Firebase config
 import TableContainer from "../../../../Common/Tabledata/TableContainer";
 import NoSearchResult from "../../../../Common/Tabledata/NoSearchResult";
 import "react-toastify/dist/ReactToastify.css";
-import { useNavigate } from "react-router-dom";
 
 const ViewCourses: React.FC = () => {
   document.title = "Courses";
-
 
   const navigate = useNavigate();
   const [courses, setCourses] = useState<any[]>([]);
@@ -176,27 +176,34 @@ const ViewCourses: React.FC = () => {
       ),
     },
     {
-      Header: "Actions",
-      accessor: "actions",
+      Header: "Action",
+      accessor: "action",
       Filter: false,
       isSortable: false,
+      style: { width: "12%" },
       Cell: (cell: any) => (
-        <div className="d-flex gap-2">
-          <Button
-            size="sm"
-            variant="info"
+        <ul className="list-inline hstack gap-2 mb-0">
+          <li
+            className="list-inline-item edit"
             onClick={() => handleEditCourse(cell.row.original)}
           >
-            Edit
-          </Button>
-          <Button
-            size="sm"
-            variant="danger"
+            <Link to="#" className="btn btn-soft-info btn-sm d-inline-block">
+              <i className="las la-pen fs-17 align-middle"></i>
+            </Link>
+          </li>
+          <li
+            className="list-inline-item delete"
             onClick={() => handleDeleteCourse(cell.row.original.id)}
           >
-            Delete
-          </Button>
-        </div>
+            <Link
+              to="#"
+              className="btn btn-soft-danger btn-sm d-inline-block"
+              title="Delete Course"
+            >
+              <i className="las la-trash fs-17 align-middle"></i>
+            </Link>
+          </li>
+        </ul>
       ),
     },
   ];
@@ -206,24 +213,24 @@ const ViewCourses: React.FC = () => {
       <div className="page-content">
         <Container fluid>
           <h2 className="my-4">View Courses</h2>
-          <Row className="mb-4">
-            <Col className="text-end">
-              <Button variant="primary" onClick={() => navigate("/AddCourses")}>
+          <Row>
+            <Col className="text-end mb-3">
+              <Button
+                variant="primary"
+                onClick={() => navigate("/AddCourses")}
+              >
                 Add New Course
               </Button>
             </Col>
           </Row>
-
           <Row>
             <Col xl={12}>
               <Card>
                 <Card.Body>
                   {isLoading ? (
-                    <div className="text-center">
-                      <Spinner animation="border" role="status">
-                        <span className="visually-hidden">Loading...</span>
-                      </Spinner>
-                    </div>
+                    <Spinner animation="border" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </Spinner>
                   ) : courses.length > 0 ? (
                     <TableContainer
                       isPagination={true}
