@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Container, Spinner, Table, Button, Card } from "react-bootstrap";
+import { Container, Table, Button, Modal } from "react-bootstrap";
 import { db } from "../../../../helpers/config";
 import {
   collection,
@@ -15,7 +15,7 @@ import {
 } from "firebase/firestore";
 import { useAuth } from "../../../../helpers/auth_context";
 import { fetchUserNameById } from "../../../../helpers/firebase_helper";
-import { toast } from "react-toastify";
+import moment from "moment";
 
 type EnrollmentRequest = {
   id: string;
@@ -29,6 +29,9 @@ type EnrollmentRequest = {
 const EnrollmentRequests = () => {
   const [requests, setRequests] = useState<EnrollmentRequest[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [showViewModal, setShowViewModal] = useState<boolean>(false);
+  const [selectedRequest, setSelectedRequest] = useState<EnrollmentRequest | null>(null);
+
   const { currentUser } = useAuth();
 
   useEffect(() => {
@@ -56,7 +59,6 @@ const EnrollmentRequests = () => {
         setRequests(updatedRequests);
       } catch (error) {
         console.error("Error fetching requests:", error);
-        toast.error("Failed to fetch enrollment requests.");
       } finally {
         setIsLoading(false);
       }
@@ -66,10 +68,6 @@ const EnrollmentRequests = () => {
   }, []);
 
   const handleAcceptRequest = async (request: EnrollmentRequest) => {
-    if (!window.confirm(`Are you sure you want to accept ${request.traineeName}'s request?`)) {
-      return;
-    }
-
     try {
       const courseRef = doc(db, "courses", request.courseId);
       await updateDoc(courseRef, {
@@ -92,18 +90,12 @@ const EnrollmentRequests = () => {
       });
 
       setRequests((prev) => prev.filter((r) => r.id !== request.id));
-      toast.success("Request accepted successfully!");
     } catch (error) {
       console.error("Error accepting request:", error);
-      toast.error("Failed to accept the request.");
     }
   };
 
   const handleRejectRequest = async (request: EnrollmentRequest) => {
-    if (!window.confirm(`Are you sure you want to reject ${request.traineeName}'s request?`)) {
-      return;
-    }
-
     try {
       const requestRef = doc(db, "enrollmentRequests", request.id);
       await deleteDoc(requestRef);
@@ -121,74 +113,94 @@ const EnrollmentRequests = () => {
       });
 
       setRequests((prev) => prev.filter((r) => r.id !== request.id));
-      toast.success("Request rejected successfully!");
     } catch (error) {
       console.error("Error rejecting request:", error);
-      toast.error("Failed to reject the request.");
     }
   };
+
+
 
   return (
     <div className="page-content">
       <Container fluid>
-        <Card className="mb-4">
-          <Card.Header className="bg-primary text-white text-center">
-            <h2>Enrollment Requests</h2>
-          </Card.Header>
-          <Card.Body>
-            {isLoading ? (
-              <div className="text-center my-5">
-                <Spinner animation="border" role="status">
-                  <span className="visually-hidden">Loading...</span>
-                </Spinner>
-              </div>
-            ) : requests.length > 0 ? (
-              <Table striped bordered hover responsive>
-                <thead className="table-primary">
-                  <tr>
-                    <th>Course</th>
-                    <th>Trainee</th>
-                    <th>Status</th>
-                    <th className="text-center">Action</th>
+        <h3>Enrollment Requests</h3>
+        {isLoading ? (
+          <p>Loading...</p>
+        ) : (
+          <Table bordered hover responsive>
+            <thead>
+              <tr>
+                <th>Course</th>
+                <th>Trainee</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {requests.length > 0 ? (
+                requests.map((request) => (
+                  <tr key={request.id}>
+                    <td>{request.courseTitle}</td>
+                    <td>{request.traineeName}</td>
+                    <td>{request.status}</td>
+                    <td>{moment().format("YYYY-MM-DD HH:mm")}</td>
+                    <td>
+                      <Button
+                        size="sm"
+                        variant="success"
+                        className="ms-2"
+                        onClick={() => handleAcceptRequest(request)}
+                      >
+                        Accept
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="danger"
+                        className="ms-2"
+                        onClick={() => handleRejectRequest(request)}
+                      >
+                        Reject
+                      </Button>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {requests.map((request) => (
-                    <tr key={request.id}>
-                      <td>{request.courseTitle}</td>
-                      <td>{request.traineeName}</td>
-                      <td>
-                        <span className="badge bg-warning text-dark">{request.status}</span>
-                      </td>
-                      <td className="text-center">
-                        <Button
-                          variant="success"
-                          size="sm"
-                          onClick={() => handleAcceptRequest(request)}
-                          className="me-2"
-                        >
-                          Accept
-                        </Button>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() => handleRejectRequest(request)}
-                        >
-                          Reject
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            ) : (
-              <div className="text-center my-5">
-                <p className="text-muted">No pending enrollment requests.</p>
-              </div>
-            )}
-          </Card.Body>
-        </Card>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="text-center">
+                    No Pending Requests
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+        )}
       </Container>
+
+      {/* View Modal */}
+      <Modal show={showViewModal} onHide={() => setShowViewModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Request Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedRequest && (
+            <>
+              <p>
+                <strong>Course:</strong> {selectedRequest.courseTitle}
+              </p>
+              <p>
+                <strong>Trainee:</strong> {selectedRequest.traineeName}
+              </p>
+              <p>
+                <strong>Status:</strong> {selectedRequest.status}
+              </p>
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button onClick={() => setShowViewModal(false)}>Close</Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
