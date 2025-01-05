@@ -2,4 +2,13 @@
 // allows you to do things like:
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
+// src/setupTests.js
 import '@testing-library/jest-dom';
+import { TextEncoder, TextDecoder } from 'util';
+import 'whatwg-fetch';
+import 'web-streams-polyfill';
+
+// Add TextEncoder and TextDecoder to the global scope
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder as unknown as typeof globalThis.TextDecoder;
+global.ReadableStream = ReadableStream;
