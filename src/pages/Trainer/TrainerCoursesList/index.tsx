@@ -17,7 +17,7 @@ import TableContainer from "../../../Common/Tabledata/TableContainer";
 import NoSearchResult from "../../../Common/Tabledata/NoSearchResult";
 import EditProductList from "../../../Common/CrudModal/EditProductList";
 import { DeleteModal } from "../../../Common/DeleteModal";
- import { db } from "../../../App"; 
+import { db } from "../../../App";
 
 const TrainerCoursesList = () => {
   document.title = "Trainer Courses List";
@@ -59,7 +59,6 @@ const TrainerCoursesList = () => {
 
   const columns: columnsType[] = useMemo(
     () => [
-      
       {
         Header: "COURSE NAME",
         accessor: "productName",
@@ -78,7 +77,6 @@ const TrainerCoursesList = () => {
         },
       },
 
-
       {
         Header: "LOCATION",
         accessor: "location",
@@ -91,7 +89,7 @@ const TrainerCoursesList = () => {
         accessor: "expiryDate",
         Filter: false,
         isSortable: true,
-        Cell: (cell: any) => <>{cell.row.original.expiryDate}</>,
+        Cell: (cell: any) => <>{cell.row.original.endDate}</>,
       },
 
       {

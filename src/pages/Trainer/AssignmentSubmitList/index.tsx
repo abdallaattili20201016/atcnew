@@ -1,6 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
-import {Button,Card,Col,Container,Dropdown,Form,InputGroup, Row,Spinner, ToastContainer} from "react-bootstrap";
+import {
+  Button,
+  Card,
+  Col,
+  Container,
+  Dropdown,
+  Form,
+  InputGroup,
+  Row,
+  Spinner,
+  ToastContainer,
+} from "react-bootstrap";
 import { getFirebaseBackend } from "../../../helpers/firebase_helper";
 import { toast } from "react-toastify";
 import { Link, useLocation, useParams } from "react-router-dom";
@@ -15,15 +26,16 @@ const AssignmentSubmitList = () => {
   const course_id = location.state.course_id;
   const assignment_id = location.state.assignment_id;
 
-  const [data, setData] = useState<any>({});
+  const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const firebaseBackend = getFirebaseBackend();
 
   const loadData = async () => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
       const dataList = await firebaseBackend.getTrainerCourses(course_id);
-      setData(dataList.assignments[assignment_id]);
+      var tempdata = dataList.assignments[assignment_id];
+      setData(tempdata);
     } catch (error) {
     } finally {
       setIsLoading(false);
@@ -31,19 +43,8 @@ const AssignmentSubmitList = () => {
   };
 
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        loadData(); // Load data when the page becomes visible
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    // Clean up the event listener
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, [course_id, assignment_id]);
+    loadData();
+  }, [firebaseBackend]);
 
   const loadUser = async (id: any) => {
     const dataList = await firebaseBackend.getUserDetailsByUid(id);
@@ -99,7 +100,7 @@ const AssignmentSubmitList = () => {
         accessor: "maxMark",
         Filter: false,
         isSortable: true,
-        Cell: (cell: any) => <>{data.mark}</>,
+        Cell: (cell: any) => <>{data?.mark ?? "N/A"}</>,
       },
       {
         Header: "File",
@@ -127,7 +128,7 @@ const AssignmentSubmitList = () => {
         isSortable: false,
         Cell: (cell: any) => {
           const [value, setValue] = useState<number>(cell.row.original.mark);
-          const maxMark = data.mark;
+          const maxMark = data?.mark ?? "N/A";
 
           const handleInputChange = (e: any) => {
             setValue(e.target.value);
@@ -173,8 +174,9 @@ const AssignmentSubmitList = () => {
         },
       },
     ],
-    []
+    [data]
   );
+
   return (
     <React.Fragment>
       <div className="page-content">
