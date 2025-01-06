@@ -325,6 +325,31 @@ class FirebaseAuthBackend {
   /**
    * Deletes a user from Firestore.
    */
+  async deleteUser(userId: string) {
+    try {
+      const userRef = doc(this.firestore, "users", userId);
+
+      // Fetch the original user data before deletion
+      const userSnapshot = await getDoc(userRef);
+      if (!userSnapshot.exists()) {
+        console.error("User not found!");
+        return;
+      }
+      const originalData = userSnapshot.data();
+
+      // Delete the user document
+      await deleteDoc(userRef);
+
+      // Log the deletion event with original data
+      await logEvent("DeleteUser", {}, originalData, userId);
+
+      console.log("User deleted successfully");
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      throw error;
+    }
+  }
+
   // Removed duplicate deleteUser function in the class
 
   //end attili
@@ -1059,7 +1084,7 @@ export const deleteUser = async (userId: string) => {
 
     // Fetch the original user data before deletion
     const userSnapshot = await getDoc(userRef);
-    if (!userSnapshot.exists) {
+    if (!userSnapshot.exists()) {
       console.error("User not found!");
       return;
     }
