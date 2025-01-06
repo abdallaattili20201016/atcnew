@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getDocs, collection, query, orderBy, Timestamp } from "firebase/firestore";
-import { db } from "../../helpers/config"; // Ensure db is correctly imported
+import { db } from "../../helpers/config";
 import { fetchUserNameById as loadUserName } from "../../helpers/firebase_helper";
 import { Container } from "react-bootstrap";
 
@@ -11,19 +11,24 @@ const AuditLogPage: React.FC = () => {
   const [filterUserId, setFilterUserId] = useState("");
   const [userNames, setUserNames] = useState<{ [key: string]: string }>({});
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const filteredLogs = logs.filter((log) => {
     const matchesSearch =
       search === "" ||
       log.action.toLowerCase().includes(search.toLowerCase()) ||
       log.userId.toLowerCase().includes(search.toLowerCase());
-    const matchesAction =
-      filterAction === "" || log.action === filterAction;
+    const matchesAction = filterAction === "" || log.action === filterAction;
     const matchesUserId = filterUserId === "" || log.userId === filterUserId;
 
     return matchesSearch && matchesAction && matchesUserId;
   });
 
+  const paginatedLogs = filteredLogs.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   useEffect(() => {
     const fetchLogs = async () => {
@@ -69,7 +74,9 @@ const AuditLogPage: React.FC = () => {
   }, [filteredLogs]);
 
   const formatDetails = (details: any): JSX.Element => {
-    if (!details || typeof details !== "object") return <span>{details}</span>;
+    if (!details || typeof details !== "object") {
+      return <span>{String(details)}</span>;
+    }
 
     if (details.updates) {
       const updates = details.updates;
@@ -80,7 +87,7 @@ const AuditLogPage: React.FC = () => {
         if (value instanceof Timestamp) {
           return value.toDate().toLocaleString();
         }
-        return value;
+        return JSON.stringify(value, null, 2);
       };
 
       Object.keys(updates).forEach((key) => {
@@ -120,153 +127,137 @@ const AuditLogPage: React.FC = () => {
       );
     }
 
+    // Fallback: Render other types of objects
     return (
       <pre className="text-wrap bg-light p-2 rounded">
-        {JSON.stringify(details, (key, value) => {
-          if (value instanceof Timestamp) {
-            return value.toDate().toLocaleString();
-          }
-          return value;
-        }, 2)}
+        {JSON.stringify(details, null, 2)}
       </pre>
     );
   };
 
-  const handleExportCSV = () => {
-    const csvData = logs.map((log) => ({
-      Action: log.action,
-      Details: JSON.stringify(log.details),
-      "User ID": log.userId,
-      Timestamp: new Date(log.timestamp.toDate()).toLocaleString(),
-    }));
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      ["Action,Details,User ID,Timestamp"]
-        .concat(
-          csvData.map((row) =>
-            [row.Action, row.Details, row["User ID"], row.Timestamp].join(",")
-          )
-        )
-        .join("\n");
-    const blob = new Blob([decodeURIComponent(encodeURI(csvContent))], {
-      type: "text/csv;charset=utf-8;",
-    });
-    // saveAs(blob, "audit_logs.csv");
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
   };
 
-  
-
-  if (error) {
-    return <div className="alert alert-danger">{error}</div>;
-  }
+  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
 
   return (
     <React.Fragment>
-    <div className="page-content">
-    <Container fluid>
-    <h2 className="my-4">Audit Logs</h2>
-      <div className="card shadow-sm">
-        <div className="card-header bg-primary text-white">
-          
-        </div>
-        <div className="card-body">
-          <div className="mb-3">
-            <input
-              type="text"
-              className="form-control mb-2"
-              placeholder="Search logs..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            <div className="row">
-              <div className="col-md-6">
-                <select
-                  className="form-select mb-2"
-                  title="Filter by Action"
-                  value={filterAction}
-                  onChange={(e) => setFilterAction(e.target.value)}
-                >
-                  <option value="">Filter by Action</option>
-                  {Array.from(new Set(logs.map((log) => log.action))).map((action) => (
-                    <option key={action} value={action}>
-                      {action}
-                    </option>
-                  ))}
-                </select>
+      <div className="page-content">
+        <Container fluid>
+          <h2 className="my-4">Audit Logs</h2>
+          <div className="card shadow-sm">
+            <div className="card-header bg-primary text-white"></div>
+            <div className="card-body">
+              {/* Search and Filters */}
+              <div className="mb-3">
+                <input
+                  type="text"
+                  className="form-control mb-2"
+                  placeholder="Search logs..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+                <div className="row">
+                  <div className="col-md-6">
+                    <select
+                      className="form-select mb-2"
+                      title="Filter by Action"
+                      value={filterAction}
+                      onChange={(e) => setFilterAction(e.target.value)}
+                    >
+                      <option value="">Filter by Action</option>
+                      {Array.from(new Set(logs.map((log) => log.action))).map((action) => (
+                        <option key={action} value={action}>
+                          {action}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="col-md-6">
+                    <select
+                      className="form-select mb-2"
+                      title="Filter by User ID"
+                      value={filterUserId}
+                      onChange={(e) => setFilterUserId(e.target.value)}
+                    >
+                      <option value="">Filter by User ID</option>
+                      {Array.from(new Set(logs.map((log) => log.userId))).map((userId) => (
+                        <option key={userId} value={userId}>
+                          {userId}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
               </div>
-              <div className="col-md-6">
-                <select
-                  className="form-select mb-2"
-                  title="Filter by User ID"
-                  value={filterUserId}
-                  onChange={(e) => setFilterUserId(e.target.value)}
-                >
-                  <option value="">Filter by User ID</option>
-                  {Array.from(new Set(logs.map((log) => log.userId))).map((userId) => (
-                    <option key={userId} value={userId}>
-                      {userId}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {/* Log Table */}
+              {paginatedLogs.length === 0 ? (
+                <div className="text-center">
+                  <p className="text-muted">No logs available</p>
+                </div>
+              ) : (
+                <div className="table-responsive">
+                  <table className="table table-bordered table-hover">
+                    <thead className="thead-dark">
+                      <tr>
+                        <th scope="col">Action</th>
+                        <th scope="col">Details</th>
+                        <th scope="col">User</th>
+                        <th scope="col">Timestamp</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paginatedLogs.map((log) => (
+                        <tr key={log.id}>
+                          <td>{log.action}</td>
+                          <td>
+                            <button
+                              className="btn btn-link text-decoration-none"
+                              type="button"
+                              onClick={() =>
+                                document
+                                  .getElementById(`details-${log.id}`)
+                                  ?.classList.toggle("show")
+                              }
+                            >
+                              View Details
+                            </button>
+                            <div
+                              className="collapse mt-2"
+                              id={`details-${log.id}`}
+                            >
+                              {formatDetails(log.details)}
+                            </div>
+                          </td>
+                          <td>{userNames[log.userId] || "Loading..."}</td>
+                          <td>{new Date(log.timestamp.toDate()).toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <nav>
+                  <ul className="pagination justify-content-center">
+                    {Array.from({ length: totalPages }, (_, page) => page).map((page) => (
+                      <li
+                        key={page}
+                        className={`page-item ${page + 1 === currentPage ? "active" : ""}`}
+                        onClick={() => handlePageChange(page + 1)}
+                      >
+                        <button className="page-link">{page + 1}</button>
+                      </li>
+                    ))}
+                  </ul>
+                </nav>
+              )}
             </div>
           </div>
-          <button
-            className="btn btn-success mb-3"
-            onClick={handleExportCSV}
-          >
-            Export CSV
-          </button>
-          {filteredLogs.length === 0 ? (
-            <div className="text-center">
-              <p className="text-muted">No logs available</p>
-            </div>
-          ) : (
-            <div className="table-responsive">
-              <table className="table table-bordered table-hover">
-                <thead className="thead-dark">
-                  <tr>
-                    <th scope="col">Action</th>
-                    <th scope="col">Details</th>
-                    <th scope="col">User</th>
-                    <th scope="col">Timestamp</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredLogs.map((log) => (
-                    <tr key={log.id}>
-                      <td>{log.action}</td>
-                      <td>
-                        <button
-                          className="btn btn-link text-decoration-none"
-                          type="button"
-                          onClick={() =>
-                            document
-                              .getElementById(`details-${log.id}`)
-                              ?.classList.toggle("show")
-                          }
-                        >
-                          View Details
-                        </button>
-                        <div
-                          className="collapse mt-2"
-                          id={`details-${log.id}`}
-                        >
-                          {formatDetails(log.details)}
-                        </div>
-                      </td>
-                      <td>{userNames[log.userId] || "Loading..."}</td>
-                      <td>{new Date(log.timestamp.toDate()).toLocaleString()}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+        </Container>
       </div>
-      </Container>
-    </div>
     </React.Fragment>
   );
 };
