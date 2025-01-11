@@ -10,7 +10,6 @@ const CourseStatistic = ({ data }: { data: any }) => {
   const [statistic, setStatistic] = useState<any>([]);
 
   const calculateStatistics = () => {
-    // Filter submissions for the given student
     const studentSubmissions = data.assignments.flatMap(
       (assignment: { submits: any[] }) =>
         assignment.submits.filter(
@@ -18,7 +17,6 @@ const CourseStatistic = ({ data }: { data: any }) => {
         )
     );
 
-    // Calculate statistics
     const totalAssignments = data.assignments.length;
     const completedAssignments = studentSubmissions.length;
     const totalMarks = studentSubmissions.reduce(

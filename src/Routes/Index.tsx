@@ -14,7 +14,6 @@ const Index = () => {
               key={idx}
               path={route.path}
               element={route.component}
-              // exact={true}
             />
           ))}
         </Route>
@@ -24,7 +23,6 @@ const Index = () => {
               key={idx}
               path={route.path}
               element={<Layout>{route.component}</Layout>}
-              // exact={true}
             />
           ))}
         </Route>

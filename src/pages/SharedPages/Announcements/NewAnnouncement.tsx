@@ -4,7 +4,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../../../App";
-import { getAuth } from "firebase/auth"; // Import Firebase Auth for the user info
+import { getAuth } from "firebase/auth"; 
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
@@ -12,10 +12,9 @@ const NewAnnouncement = () => {
   document.title = "New Announcement | Admin Dashboard";
 
   const navigate = useNavigate();
-  const auth = getAuth(); // Get the authenticated user
-  const currentUser = JSON.parse(sessionStorage.getItem("user_details") || '{}'); // Get the authenticated user
+  const auth = getAuth(); 
+  const currentUser = JSON.parse(sessionStorage.getItem("user_details") || '{}'); 
 
-  // Form validation with Yup
   const validationSchema = Yup.object({
     title: Yup.string().required("Title is required"),
     description: Yup.string().required("Description is required"),
@@ -46,7 +45,7 @@ const NewAnnouncement = () => {
         });
         toast.success("Announcement created successfully!");
         resetForm();
-        navigate("/announcements-table"); // Navigate after successful save
+        navigate("/announcements-table"); 
       } catch (error) {
         console.error("Error creating announcement:", error);
         toast.error("Failed to create announcement. Please try again.");

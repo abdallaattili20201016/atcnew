@@ -15,12 +15,11 @@ import {
 } from "recharts";
 import { db } from "../../helpers/config";
 import { collection, getDocs, query, where, orderBy, limit } from "firebase/firestore";
-import { fetchUserNameById } from "../../helpers/firebase_helper"; // Add this import
+import { fetchUserNameById } from "../../helpers/firebase_helper"; 
 
 const AdminDashboard = () => {
   document.title = "Dashboard";
 
-  // State for dashboard data
   const [userStats, setUserStats] = useState({
     admins: 0,
     trainers: 0,
@@ -34,13 +33,11 @@ const AdminDashboard = () => {
   >([]);
   const [userNames, setUserNames] = useState<{ [key: string]: string }>({}); // Add this state
 
-  // Pie chart colors
   const COLORS = ["#0088FE", "#00C49F", "#FFBB28"];
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        // Fetch user counts
         const usersSnapshot = await getDocs(collection(db, "users"));
         const userCounts = { admins: 0, trainers: 0, trainees: 0 };
         usersSnapshot.forEach((doc) => {
@@ -51,13 +48,11 @@ const AdminDashboard = () => {
         });
         setUserStats(userCounts);
 
-        // Fetch active courses
         const coursesSnapshot = await getDocs(
           query(collection(db, "courses"), where("status", "==", "active"))
         );
         setActiveCourses(coursesSnapshot.size);
 
-        // Fetch recent activities
         const activitiesQuery = query(
           collection(db, "auditLogs"),
           orderBy("timestamp", "desc"),
@@ -67,14 +62,13 @@ const AdminDashboard = () => {
         const activities = activitiesSnapshot.docs.map((doc) => doc.data() as { description: string });
         setRecentActivities(activities);
 
-        // Fetch monthly course data (for Line Chart)
         const monthlyQuery = query(collection(db, "courses"), orderBy("start"));
         const monthlySnapshot = await getDocs(monthlyQuery);
         const monthlyData = monthlySnapshot.docs.map((doc) => ({
           name: new Date(doc.data().start.seconds * 1000).toLocaleDateString("en-US", {
             month: "short",
           }),
-          courses: 1, // Adjust if storing course counts per month
+          courses: 1, 
         }));
         setMonthlyCourseData(monthlyData);
       } catch (error) {
@@ -84,15 +78,13 @@ const AdminDashboard = () => {
 
     const fetchAuditLogs = async () => {
       try {
-        // Query the auditLogs collection
         const logsQuery = query(
           collection(db, "auditLogs"),
           orderBy("timestamp", "desc"),
-          limit(5) // Limit to the 5 most recent logs
+          limit(5) 
         );
         const logsSnapshot = await getDocs(logsQuery);
 
-        // Map over the documents and format data
         const logs = logsSnapshot.docs.map((doc) => {
           const data = doc.data();
           const changes = data.details?.updates
@@ -242,7 +234,7 @@ const AdminDashboard = () => {
                     <tbody>
                       {auditLogs.map((log, index) => (
                         <tr key={index}>
-                          <td>{userNames[log.userId] || "Loading..."}</td> {/* Update this line */}
+                          <td>{userNames[log.userId] || "Loading..."}</td> 
                           <td>{log.action}</td>
                           <td>{log.timestamp}</td>
                           <td>{log.changes}</td>

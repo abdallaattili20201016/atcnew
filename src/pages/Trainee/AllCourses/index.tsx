@@ -21,13 +21,13 @@ import {
 } from "firebase/firestore";
 import NoSearchResult from "../../../Common/Tabledata/NoSearchResult";
 
-// Define the Course type
+
 type Course = {
   id: string;
   title: string;
   description?: string;
   location?: string;
-  students?: string[]; // Array of trainee UIDs
+  students?: string[]; 
   isEnrolled?: boolean;
   isPendingRequest?: boolean;
 };
@@ -36,16 +36,15 @@ const AllCourses = () => {
   document.title = "All Courses";
 
   const { currentUser } = useAuth();
-  const [data, setData] = useState<Course[]>([]); // Update state type
+  const [data, setData] = useState<Course[]>([]); 
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [pendingRequests, setPendingRequests] = useState<any[]>([]); // Can define a type if needed
+  const [pendingRequests, setPendingRequests] = useState<any[]>([]); 
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setIsLoading(true);
     
-        // Fetch all courses
         const coursesQuery = collection(db, "courses");
         const coursesSnapshot = await getDocs(coursesQuery);
         const coursesData: Course[] = coursesSnapshot.docs.map((doc) => ({
@@ -53,7 +52,6 @@ const AllCourses = () => {
           ...doc.data(),
         })) as Course[];
     
-        // Fetch pending enrollment requests for the current trainee
         const requestsQuery = query(
           collection(db, "enrollmentRequests"),
           where("traineeId", "==", currentUser.uid),
@@ -62,7 +60,6 @@ const AllCourses = () => {
         const requestsSnapshot = await getDocs(requestsQuery);
         const requestsData = requestsSnapshot.docs.map((doc) => doc.data());
     
-        // Mark courses where the trainee is already enrolled
         const updatedCourses = coursesData.map((course) => {
           const isEnrolled = course.students?.includes(currentUser.uid) || false;
           const isPendingRequest = requestsData.some(
@@ -99,7 +96,6 @@ const AllCourses = () => {
         requestedOn: serverTimestamp(),
       });
 
-      // Add audit log for enrollment request
       await addDoc(collection(db, "auditLogs"), {
         action: "Request Enrollment",
         userId: currentUser.uid,
@@ -116,7 +112,6 @@ const AllCourses = () => {
         { courseId: course.id, status: "pending" },
       ]);
 
-      // Update course status in UI
       setData((prevData) =>
         prevData.map((item) =>
           item.id === course.id ? { ...item, isPendingRequest: true } : item
@@ -128,11 +123,10 @@ const AllCourses = () => {
     }
   };
 
-  // Search functionality
   const handleSearch = async (e: any) => {
     const searchTerm = e.target.value.trim().toLowerCase();
     if (!searchTerm) {
-      setData((prev) => prev); // Reset to original data
+      setData((prev) => prev); 
       return;
     }
 
@@ -146,7 +140,6 @@ const AllCourses = () => {
     try {
       setIsLoading(true);
 
-      // Fetch all courses
       const coursesQuery = collection(db, "courses");
       const coursesSnapshot = await getDocs(coursesQuery);
       const coursesData: Course[] = coursesSnapshot.docs.map((doc) => ({
@@ -154,7 +147,6 @@ const AllCourses = () => {
         ...doc.data(),
       })) as Course[];
 
-      // Fetch pending enrollment requests for the current trainee
       const requestsQuery = query(
         collection(db, "enrollmentRequests"),
         where("traineeId", "==", currentUser.uid),
@@ -163,7 +155,6 @@ const AllCourses = () => {
       const requestsSnapshot = await getDocs(requestsQuery);
       const requestsData = requestsSnapshot.docs.map((doc) => doc.data());
 
-      // Mark courses where the trainee is already enrolled
       const updatedCourses = coursesData.map((course) => {
         const isEnrolled = course.students?.includes(currentUser.uid) || false;
         const isPendingRequest = requestsData.some(
@@ -208,7 +199,7 @@ const AllCourses = () => {
             </Spinner>
           ) : data.length > 0 ? (
             <Row>
-              {data.map((course: Course) => ( // Update map parameter type
+              {data.map((course: Course) => ( 
                 <Col key={course.id} xxl={3} lg={4} sm={6}>
                   <Card className="card-body text-center">
                     <div className="avatar-sm mx-auto mb-3">
@@ -238,7 +229,7 @@ const AllCourses = () => {
                               requestedOn: serverTimestamp(),
                             });
                             toast.success("Enrollment request sent!");
-                            loadData(); // Refresh data
+                            loadData(); 
                           } catch (error) {
                             console.error("Error requesting enrollment:", error);
                             toast.error("Failed to send enrollment request. Please try again.");

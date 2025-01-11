@@ -3,6 +3,8 @@ import { Container, Row, Col, Card, Table, Spinner } from "react-bootstrap";
 import { getFirebaseBackend } from "../../helpers/firebase_helper";
 
 const TraineeDashboard = () => {
+  document.title = "Trainee Dashboard";
+
   const [courses, setCourses] = useState<any[]>([]);
   const [assignmentsCompleted, setAssignmentsCompleted] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -13,11 +15,9 @@ const TraineeDashboard = () => {
       try {
         setIsLoading(true);
 
-        // Fetch trainee courses
         const dataList = await firebaseBackend.getTraineeCourses();
         setCourses(dataList);
 
-        // Calculate completed assignments (mock data for now)
         let completedAssignments = 0;
         dataList.forEach((course: any) => {
           if (course.completedAssignments) {
@@ -40,7 +40,6 @@ const TraineeDashboard = () => {
       <Container fluid>
         <h2 className="my-4">Trainee Dashboard</h2>
 
-        {/* Statistics Section */}
         <Row>
           <Col lg={6}>
             <Card className="text-center">
@@ -62,7 +61,6 @@ const TraineeDashboard = () => {
           </Col>
         </Row>
 
-        {/* Enrolled Courses Section */}
         <Row className="mt-4">
           <Col lg={12}>
             <Card>
@@ -106,13 +104,12 @@ const TraineeDashboard = () => {
           </Col>
         </Row>
 
-        {/* Recent Announcements Section */}
         <Row className="mt-4">
           <Col lg={12}>
             <Card>
               <Card.Body>
                 <h4 className="card-title">Recent Announcements</h4>
-                <p>No announcements available</p> {/* Replace this with dynamic announcements if needed */}
+                <p>No announcements available</p>
               </Card.Body>
             </Card>
           </Col>

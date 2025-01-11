@@ -42,7 +42,7 @@ const CourseDetails = () => {
           console.error("Error fetching user role:", error);
         }
       } else {
-        setUserRole("guest"); // Fallback for unauthenticated users
+        setUserRole("guest"); 
       }
     };
 

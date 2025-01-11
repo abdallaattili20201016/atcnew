@@ -16,7 +16,6 @@ const Payment = () => {
 
   const currentUser = JSON.parse(sessionStorage.getItem("user_details") || "{}");
 
-  // Fetch payment history
   const fetchPayments = async () => {
     if (!currentUser.uid) {
       toast.error("Unable to fetch payments. Please log in.");
@@ -41,7 +40,6 @@ const Payment = () => {
       });
       setPayments(fetchedPayments);
 
-      // Calculate total amount
       const total = fetchedPayments.reduce((sum, payment) => sum + payment.price, 0);
       setTotalAmount(total);
     } catch (error) {

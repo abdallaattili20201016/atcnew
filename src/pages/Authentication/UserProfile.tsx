@@ -43,8 +43,10 @@ const UserProfile: React.FC = () => {
   const [phone, setPhone] = useState<string>("");
   const [city, setCity] = useState<string>("");
   const [street, setStreet] = useState<string>("");
-  const [avatarURL, setAvatarURL] = useState<string>(""); // Initial avatar state
+  const [avatarURL, setAvatarURL] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+
+  // avatar and personal photo is future work
 
   const loadUserName = async (uid: string) => {
     try {
@@ -55,7 +57,7 @@ const UserProfile: React.FC = () => {
         setUsername(data.username);
         setEmail(data.email);
         setPhone(data.phone);
-        setAvatarURL(data.picture); // Set avatar URL from Firestore
+        setAvatarURL(data.picture); // Set the avatar URL from Firestore 'future work'
       }
     } catch (error) {
       console.error("Error loading user details:", error);
@@ -113,10 +115,10 @@ const UserProfile: React.FC = () => {
                   ...(values.city && { city: values.city }),
                   ...(values.street && { street: values.street }),
                 },
-                picture: downloadURL, // Save the new avatar URL to Firestore
+                picture: downloadURL, 
               });
 
-              setAvatarURL(downloadURL); // Update avatar state after successful upload
+              setAvatarURL(downloadURL); 
               toast.success("Profile updated successfully", {
                 autoClose: 2000,
               });
@@ -158,7 +160,7 @@ const UserProfile: React.FC = () => {
                             <div className="d-flex">
                               <div className="mx-3">
                                 <img
-                                  src={avatarURL} // Use updated avatar URL here
+                                  src={avatarURL} 
                                   alt=""
                                   className="avatar-lg rounded-circle img-thumbnail"
                                 />
@@ -235,7 +237,7 @@ const UserProfile: React.FC = () => {
                               name="avatar"
                               className="form-control"
                               type="file"
-                              accept="image/png, image/jpeg" // Only allows PNG and JPG files to be selected
+                              accept="image/png, image/jpeg"
                               onChange={(
                                 event: React.ChangeEvent<HTMLInputElement>
                               ) =>

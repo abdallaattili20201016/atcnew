@@ -20,7 +20,6 @@ const MainDashboard = () => {
     setLoading(false);
   }, []);
 
-  // Show a loading spinner while determining the role
   if (loading) {
     return (
       <div className="text-center mt-5">
@@ -31,7 +30,7 @@ const MainDashboard = () => {
     );
   }
 
-  // Render the appropriate dashboard based on the role
+ 
   return (
     <div className="page-content">
       <div className="dashboard-content">

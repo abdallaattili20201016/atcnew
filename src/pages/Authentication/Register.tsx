@@ -23,7 +23,6 @@ const Register = () => {
 
   const navigate = useNavigate();
 
-  // initialize relavant method of both Auth
   const fireBaseBackend = getFirebaseBackend();
 
   const [passwordShow, setPasswordShow] = useState<any>(false);
@@ -46,7 +45,6 @@ const Register = () => {
     });
 
   const validation: any = useFormik({
-    // enableReinitialize : use this flag when initial values needs to be changed
     enableReinitialize: true,
 
     initialValues: {
@@ -113,7 +111,7 @@ const Register = () => {
             errornotify("An internal error occurred. Please try again.");
             break;
           default:
-            errornotify(error.message); // Display the actual error message
+            errornotify(error.message);
             break;
         }
       } finally {

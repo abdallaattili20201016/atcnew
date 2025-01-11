@@ -22,13 +22,11 @@ const AssignmentSection = ({
   document.title = "Assignments";
   const firebaseBackend = getFirebaseBackend();
 
-  // State for modal visibility and edit data
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editData, setEditData] = useState<any>(null);
   const [delet, setDelet] = useState<boolean>(false);
   const [deletid, setDeletid] = useState<any>();
 
-  // Handle modal open/close
   const handleModalClose = (reset: boolean) => {
     loadData();
     setIsModalVisible(false);
@@ -181,10 +179,10 @@ const AssignmentSection = ({
         Filter: false,
         isSortable: false,
         Cell: (cell: any) => {
-          const index = cell.row.index; // Get index of the assignment in the array
+          const index = cell.row.index; 
           const assignment = cell.row.original;
 
-          const now = moment(); // Current time
+          const now = moment(); 
           const startDate = moment(assignment.start.toDate());
           const endDate = moment(assignment.end.toDate());
 
@@ -261,7 +259,7 @@ const AssignmentSection = ({
         </Col>
       </Row>
 
-      {/* Add/Edit Assignment Modal */}
+      {/* Add/Edit Assignment */}
       <SubmitAnswer
         isShow={isModalVisible}
         handleClose={handleModalClose}

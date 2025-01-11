@@ -29,13 +29,11 @@ const DocumentsSection = ({
 }) => {
   const firebaseBackend = getFirebaseBackend();
 
-  // State for modal visibility and edit data
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editData, setEditData] = useState<any>(null);
   const [delet, setDelet] = useState<boolean>(false);
   const [deletid, setDeletid] = useState<any>();
 
-  // Handle modal open/close
   const handleModalClose = (reset: boolean) => {
     loadData();
     setIsModalVisible(false);
@@ -114,7 +112,7 @@ const DocumentsSection = ({
         Filter: false,
         isSortable: false,
         Cell: (cell: any) => {
-          const index = cell.row.index; // Get index of the assignment in the array
+          const index = cell.row.index; 
           const data = cell.row.original;
 
           return (
@@ -178,14 +176,14 @@ const DocumentsSection = ({
         </Col>
       </Row>
 
-      {/* Add/Edit Document Modal */}
+      {/* Add/Edit Document */}
       <AddEditDocuments
         isShow={isModalVisible}
         handleClose={handleModalClose}
         edit={editData}
       />
 
-      {/* Delete Document Modal */}
+      {/* Delete Document */}
       <DeleteModal
         show={delet}
         handleClose={() => {

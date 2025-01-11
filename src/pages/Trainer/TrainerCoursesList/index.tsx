@@ -41,9 +41,8 @@ const TrainerCoursesList = () => {
     loadData();
   }, [firebaseBackend]);
 
-  // search
   const handleSearch = async (ele: any) => {
-    const item = ele.value.trim(); // Trim whitespace
+    const item = ele.value.trim(); 
 
     loadData(item);
   };
@@ -65,7 +64,7 @@ const TrainerCoursesList = () => {
         Filter: false,
         isSortable: true,
         Cell: (cell: any) => {
-          const { title } = cell.row.original; // Destructure to get images and title
+          const { title } = cell.row.original; 
 
           return (
             <div className="d-flex align-items-center">

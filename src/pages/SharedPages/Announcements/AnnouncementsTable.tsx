@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Card, Col, Row, Table, Container, Modal, Button } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
-import { db } from "../../../App"; // Adjust path to your Firebase setup
+import { db } from "../../../App"; 
 import moment from "moment";
 
 const AnnouncementsTable = () => {
@@ -15,7 +15,6 @@ const AnnouncementsTable = () => {
 
   const navigate = useNavigate();
 
-  // Assuming role is stored in sessionStorage for role-based permissions
   const currentUser = JSON.parse(sessionStorage.getItem("user_details") || "{}");
   const isAdmin = currentUser.role === "admin";
   const isTrainer = currentUser.role === "trainer";
@@ -38,7 +37,7 @@ const AnnouncementsTable = () => {
   };
 
   const handleDeleteAnnouncement = async (id: string) => {
-    if (!isAdmin) return; // Only admin can delete
+    if (!isAdmin) return; // role based 'only admons can delete' 
     try {
       await deleteDoc(doc(db, "Announcements", id));
       setAnnouncements((prev) => prev.filter((announcement) => announcement.id !== id));

@@ -4,7 +4,7 @@ import { db } from "../../helpers/config";
 import { collection, query, where, getDocs, orderBy, limit } from "firebase/firestore";
 import { useAuth } from "../../helpers/auth_context";
 
-// Add the Submission type
+
 type Submission = {
   course: string;
   studentName: string;
@@ -13,9 +13,11 @@ type Submission = {
 };
 
 const TrainerDashboard = () => {
+  document.title = "Trainer Dashboard";
+
   const [courses, setCourses] = useState<{ id: string; title: string; trainees: number }[]>([]);
   const [traineeCount, setTraineeCount] = useState(0);
-  const [recentSubmissions, setRecentSubmissions] = useState<Submission[]>([]); // Update state type
+  const [recentSubmissions, setRecentSubmissions] = useState<Submission[]>([]); 
 
   const { currentUser } = useAuth();
 
@@ -24,7 +26,6 @@ const TrainerDashboard = () => {
       try {
         if (!currentUser) return;
 
-        // Fetch courses assigned to the trainer
         const coursesQuery = query(
           collection(db, "courses"),
           where("trainer_id", "==", currentUser.uid)
@@ -40,11 +41,10 @@ const TrainerDashboard = () => {
         });
         setCourses(courseData);
 
-        // Calculate total trainees
+      
         const totalTrainees = courseData.reduce((sum, course) => sum + course.trainees, 0);
         setTraineeCount(totalTrainees);
 
-        // Fetch recent student submissions
         const submissions: Submission[] = [];
         for (const course of courseData) {
           const courseSubmissionsQuery = query(
@@ -77,7 +77,6 @@ const TrainerDashboard = () => {
       <Container fluid>
         <h2 className="my-4">Trainer Dashboard</h2>
 
-        {/* Statistics Section */}
         <Row>
           <Col lg={6}>
             <Card className="text-center">
@@ -99,7 +98,7 @@ const TrainerDashboard = () => {
           </Col>
         </Row>
 
-        {/* Assigned Courses Section */}
+
         <Row className="mt-4">
           <Col lg={12}>
             <Card>
@@ -132,7 +131,7 @@ const TrainerDashboard = () => {
           </Col>
         </Row>
 
-        {/* Recent Submissions Section */}
+ 
         <Row className="mt-4">
           <Col lg={12}>
             <Card>

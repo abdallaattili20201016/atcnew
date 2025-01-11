@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
 
-// Dashboard
+
 
 import Login from "../pages/Authentication/Login";
 import ForgotPassword from "../pages/Authentication/ForgotPassword";
