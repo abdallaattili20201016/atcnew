@@ -251,7 +251,7 @@ class FirebaseAuthBackend {
       email: user.email,
       phone: user.phone,
       picture: "", // You can modify this if you want to upload a user profile picture as well
-      status: 0, // 1-admin, 2-warehouse, 3-pharmacy, -1-disabled, 0-pending
+      status: 0, 
       city: user.city,
       role: user.role,
       createdDtm: firebase.firestore.FieldValue.serverTimestamp(),

@@ -3,7 +3,7 @@ import { Card, Col, Form, Row, Button, Modal } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "../../../App"; // Adjust to your firebase config path
+import { db } from "../../../App"; 
 
 import moment from "moment";
 import "firebase/storage";
